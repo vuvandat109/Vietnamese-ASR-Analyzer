@@ -16,19 +16,32 @@ import "./App.css";
 function App(){
 
 
-const [report,setReport]=useState(null);
+const [report,setReport] = useState(null);
 
-const [analysis,setAnalysis]=useState([]);
+const [analysis,setAnalysis] = useState([]);
 
-const [loading,setLoading]=useState(true);
+const [filter,setFilter] = useState("all");
+
+const [search,setSearch] = useState("");
+
+const [loading,setLoading] = useState(true);
 
 
+
+
+
+// =========================
+// LOAD DATA
+// =========================
 
 useEffect(()=>{
 
 
 axios
-.get("http://127.0.0.1:8000/report")
+.get(
+"http://127.0.0.1:8000/report"
+)
+
 .then(res=>{
 
 setReport(res.data);
@@ -38,9 +51,11 @@ setReport(res.data);
 
 
 axios
-.get("http://127.0.0.1:8000/analysis")
-.then(res=>{
+.get(
+"http://127.0.0.1:8000/analysis"
+)
 
+.then(res=>{
 
 setAnalysis(
 res.data.data || []
@@ -58,7 +73,11 @@ setLoading(false);
 
 
 
-if(loading || !report){
+
+if(
+loading ||
+!report
+){
 
 return (
 
@@ -72,23 +91,184 @@ return (
 
 
 
-const tongQuan =
-report.tong_quan;
+
+
+// =========================
+// THỐNG KÊ
+// =========================
+
+
+const total =
+analysis.length;
 
 
 
-const loi =
-report.phan_tich_loi_tieng_viet;
+const correct =
+analysis.filter(
+item=>item.status==="Đúng"
+)
+.length;
 
 
 
-const chartData =
-Object
-.entries(loi)
+const wrong =
+analysis.filter(
+item=>item.status==="Sai"
+)
+.length;
+
+
+
+
+
+// =========================
+// DỊCH LỖI
+// =========================
+
+
+function translateError(error){
+
+
+const map={
+
+
+"tone_error":
+"Sai thanh điệu",
+
+
+"initial_consonant_error":
+"Sai phụ âm đầu",
+
+
+"final_consonant_error":
+"Sai âm cuối",
+
+
+"nucleus_error":
+"Sai âm chính",
+
+
+"multi_component_error":
+"Sai nhiều thành phần",
+
+
+"non_vietnamese_token":
+"Token không phải tiếng Việt"
+
+
+};
+
+
+return map[error] || error;
+
+
+}
+
+
+
+
+
+// =========================
+// FILTER
+// =========================
+
+
+let filtered =
+analysis;
+
+
+
+if(
+filter==="correct"
+){
+
+filtered =
+filtered.filter(
+item=>item.status==="Đúng"
+)
+
+}
+
+
+
+if(
+filter==="wrong"
+){
+
+filtered =
+filtered.filter(
+item=>item.status==="Sai"
+)
+
+}
+
+
+
+
+
+if(search.trim()!==""){
+
+
+filtered =
+filtered.filter(item=>
+
+item.ground_truth
+.toLowerCase()
+.includes(
+search.toLowerCase()
+)
+
+||
+item.prediction
+.toLowerCase()
+.includes(
+search.toLowerCase()
+)
+
+
+);
+
+
+}
+
+
+
+
+
+
+// =========================
+// BIỂU ĐỒ
+// =========================
+
+
+const errorCount={};
+
+
+analysis.forEach(item=>{
+
+
+item.errors.forEach(error=>{
+
+
+errorCount[error] =
+(errorCount[error] || 0)+1;
+
+
+});
+
+
+});
+
+
+
+const chartData = Object
+.entries(errorCount)
 .map(
 ([name,value])=>({
 
-name,
+name:
+translateError(name),
+
 value
 
 })
@@ -96,7 +276,10 @@ value
 
 
 
+
+
 return (
+
 
 <div className="dashboard">
 
@@ -119,11 +302,41 @@ Whisper Vietnamese Speech Recognition Evaluation
 <div className="card">
 
 <h3>
-Số Audio
+Tổng Audio
 </h3>
 
 <strong>
-{tongQuan.so_luong_audio}
+{total}
+</strong>
+
+</div>
+
+
+
+
+<div className="card">
+
+<h3>
+Đúng
+</h3>
+
+<strong>
+{correct}
+</strong>
+
+</div>
+
+
+
+
+<div className="card">
+
+<h3>
+Sai
+</h3>
+
+<strong>
+{wrong}
 </strong>
 
 </div>
@@ -137,34 +350,20 @@ WER
 </h3>
 
 <strong>
+
 {
-(tongQuan.WER_trung_binh*100)
+(
+report.tong_quan.WER_trung_binh
+*
+100
+)
 .toFixed(2)
 }%
 
 </strong>
 
-</div>
-
-
-
-<div className="card">
-
-<h3>
-CER
-</h3>
-
-<strong>
-
-{
-(tongQuan.CER_trung_binh*100)
-.toFixed(2)
-}%
-
-</strong>
 
 </div>
-
 
 
 </div>
@@ -175,9 +374,11 @@ CER
 
 <div className="section">
 
+
 <h2>
-Phân tích lỗi tiếng Việt
+Thống kê lỗi tiếng Việt
 </h2>
+
 
 
 <div className="chart-box">
@@ -194,13 +395,20 @@ data={chartData}
 >
 
 
-<XAxis dataKey="name"/>
+<XAxis
+dataKey="name"
+/>
+
 
 <YAxis/>
 
+
 <Tooltip/>
 
-<Bar dataKey="value"/>
+
+<Bar
+dataKey="value"
+/>
 
 
 </BarChart>
@@ -224,8 +432,56 @@ data={chartData}
 
 
 <h2>
-Phân tích theo Audio
+Phân tích từng Audio
 </h2>
+
+
+
+<div>
+
+
+<button
+onClick={()=>setFilter("all")}
+>
+Tất cả
+</button>
+
+
+<button
+onClick={()=>setFilter("wrong")}
+>
+Chỉ lỗi
+</button>
+
+
+<button
+onClick={()=>setFilter("correct")}
+>
+Chính xác
+</button>
+
+
+</div>
+
+
+
+
+<br/>
+
+
+<input
+
+placeholder="Tìm kiếm câu..."
+
+value={search}
+
+onChange={
+e=>setSearch(e.target.value)
+}
+
+/>
+
+
 
 
 
@@ -249,13 +505,18 @@ Whisper
 </th>
 
 <th>
+Trạng thái
+</th>
+
+<th>
 Lỗi
 </th>
 
+
 </tr>
 
-
 </thead>
+
 
 
 
@@ -263,8 +524,7 @@ Lỗi
 
 
 {
-
-analysis.map(
+filtered.map(
 (item,index)=>(
 
 
@@ -272,24 +532,34 @@ analysis.map(
 
 
 <td>
-
 {item.audio}
-
 </td>
 
 
 <td>
-
 {item.ground_truth}
-
 </td>
 
 
 <td>
-
 {item.prediction}
+</td>
+
+
+
+<td>
+
+{
+item.status==="Đúng"
+?
+"✅ Đúng"
+:
+"❌ Sai"
+}
+
 
 </td>
+
 
 
 
@@ -297,23 +567,33 @@ analysis.map(
 
 
 {
+item.errors.length===0
+
+?
+
+"Không lỗi"
+
+:
+
 item.errors.map(
 (e,i)=>(
 
 <div key={i}>
 
-{e}
+{translateError(e)}
 
 </div>
 
 )
 
 )
+
 }
 
 
 
 </td>
+
 
 
 </tr>
@@ -322,7 +602,6 @@ item.errors.map(
 )
 
 )
-
 
 }
 
@@ -336,8 +615,6 @@ item.errors.map(
 
 
 </div>
-
-
 
 
 

@@ -13,275 +13,298 @@ import {
 import "./App.css";
 
 
-function App(){
+function App() {
 
 
-const [report,setReport] = useState(null);
+  const [report, setReport] = useState(null);
 
-const [analysis,setAnalysis] = useState([]);
+  const [analysis, setAnalysis] = useState([]);
 
-const [filter,setFilter] = useState("all");
+  const [filter, setFilter] = useState("all");
 
-const [search,setSearch] = useState("");
+  const [search, setSearch] = useState("");
 
-const [loading,setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
 
 
+  // =========================
+  // LOAD API
+  // =========================
 
+  useEffect(() => {
 
-// =========================
-// LOAD DATA
-// =========================
 
-useEffect(()=>{
+    axios
+      .get(
+        "http://127.0.0.1:8000/report"
+      )
+      .then(res => {
 
+        setReport(res.data);
 
-axios
-.get(
-"http://127.0.0.1:8000/report"
-)
+      });
 
-.then(res=>{
 
-setReport(res.data);
 
-});
+    axios
+      .get(
+        "http://127.0.0.1:8000/analysis"
+      )
+      .then(res => {
 
 
+        setAnalysis(
+          res.data.data || []
+        );
 
-axios
-.get(
-"http://127.0.0.1:8000/analysis"
-)
 
-.then(res=>{
+        setLoading(false);
 
-setAnalysis(
-res.data.data || []
-);
 
+      });
 
-setLoading(false);
 
 
-});
+  }, []);
 
 
-},[]);
 
 
 
+  if (
+    loading ||
+    !report
+  ) {
 
 
-if(
-loading ||
-!report
-){
+    return (
 
-return (
+      <h2>
+        Đang tải dữ liệu...
+      </h2>
 
-<h2>
-Đang tải dữ liệu...
-</h2>
+    );
 
-)
+  }
 
-}
 
 
 
 
+  // =========================
+  // THỐNG KÊ
+  // =========================
 
-// =========================
-// THỐNG KÊ
-// =========================
 
+  const tongAudio =
+    analysis.length;
 
-const total =
-analysis.length;
 
 
+  const dung =
+    analysis.filter(
+      item =>
+        item.status === "Đúng"
+    ).length;
 
-const correct =
-analysis.filter(
-item=>item.status==="Đúng"
-)
-.length;
 
 
+  const sai =
+    analysis.filter(
+      item =>
+        item.status === "Sai"
+    ).length;
 
-const wrong =
-analysis.filter(
-item=>item.status==="Sai"
-)
-.length;
 
 
 
 
+  // =========================
+  // DỊCH LỖI
+  // =========================
 
-// =========================
-// DỊCH LỖI
-// =========================
 
+  function translateError(error) {
 
-function translateError(error){
 
+    const map = {
 
-const map={
 
+      tone_error:
+      "Sai thanh điệu",
 
-"tone_error":
-"Sai thanh điệu",
 
+      initial_consonant_error:
+      "Sai phụ âm đầu",
 
-"initial_consonant_error":
-"Sai phụ âm đầu",
 
+      final_consonant_error:
+      "Sai âm cuối",
 
-"final_consonant_error":
-"Sai âm cuối",
 
+      nucleus_error:
+      "Sai âm chính",
 
-"nucleus_error":
-"Sai âm chính",
 
+      multi_component_error:
+      "Sai nhiều thành phần",
 
-"multi_component_error":
-"Sai nhiều thành phần",
 
+      non_vietnamese_token:
+      "Token không phải tiếng Việt"
 
-"non_vietnamese_token":
-"Token không phải tiếng Việt"
 
+    };
 
-};
 
+    return (
+      map[error]
+      ||
+      error
+    );
 
-return map[error] || error;
 
+  }
 
-}
 
 
 
 
+  // =========================
+  // FILTER
+  // =========================
 
-// =========================
-// FILTER
-// =========================
 
+  let data =
+    analysis;
 
-let filtered =
-analysis;
 
 
+  if (
+    filter === "correct"
+  ) {
 
-if(
-filter==="correct"
-){
 
-filtered =
-filtered.filter(
-item=>item.status==="Đúng"
-)
+    data =
+      data.filter(
+        item =>
+          item.status === "Đúng"
+      );
 
-}
 
+  }
 
 
-if(
-filter==="wrong"
-){
 
-filtered =
-filtered.filter(
-item=>item.status==="Sai"
-)
+  if (
+    filter === "wrong"
+  ) {
 
-}
 
+    data =
+      data.filter(
+        item =>
+          item.status === "Sai"
+      );
 
 
+  }
 
 
-if(search.trim()!==""){
 
 
-filtered =
-filtered.filter(item=>
 
-item.ground_truth
-.toLowerCase()
-.includes(
-search.toLowerCase()
-)
+  if (
+    search.trim() !== ""
+  ) {
 
-||
-item.prediction
-.toLowerCase()
-.includes(
-search.toLowerCase()
-)
 
+    data =
+      data.filter(item =>
 
-);
 
+        item.ground_truth
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
 
-}
 
+        ||
 
+        item.prediction
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
 
 
+      );
 
 
-// =========================
-// BIỂU ĐỒ
-// =========================
+  }
 
 
-const errorCount={};
 
 
-analysis.forEach(item=>{
 
+  // =========================
+  // BIỂU ĐỒ LỖI
+  // =========================
 
-item.errors.forEach(error=>{
 
+  const errorMap = {};
 
-errorCount[error] =
-(errorCount[error] || 0)+1;
 
 
-});
+  analysis.forEach(item => {
 
 
-});
+    item.errors.forEach(error => {
 
 
+      errorMap[error] =
+      (
+        errorMap[error]
+        ||
+        0
+      )
+      +
+      1;
 
-const chartData = Object
-.entries(errorCount)
-.map(
-([name,value])=>({
 
-name:
-translateError(name),
+    });
 
-value
 
-})
-);
+  });
 
 
 
+  const chartData =
+    Object
+    .entries(errorMap)
+    .map(
+      ([name,value]) => ({
 
+        name:
+        translateError(name),
 
-return (
+        value
 
+      })
+    );
+
+
+
+
+
+
+
+  return (
 
 <div className="dashboard">
+
 
 
 <h1>
@@ -296,7 +319,11 @@ Whisper Vietnamese Speech Recognition Evaluation
 
 
 
+{/* ================= CARD ================= */}
+
+
 <div className="cards">
+
 
 
 <div className="card">
@@ -306,7 +333,7 @@ Tổng Audio
 </h3>
 
 <strong>
-{total}
+{tongAudio}
 </strong>
 
 </div>
@@ -317,11 +344,13 @@ Tổng Audio
 <div className="card">
 
 <h3>
-Đúng
+Nhận dạng đúng
 </h3>
 
-<strong>
-{correct}
+<strong className="green">
+
+{dung}
+
 </strong>
 
 </div>
@@ -332,22 +361,26 @@ Tổng Audio
 <div className="card">
 
 <h3>
-Sai
+Có lỗi
 </h3>
 
-<strong>
-{wrong}
+<strong className="red">
+
+{sai}
+
 </strong>
 
 </div>
 
 
 
+
 <div className="card">
 
 <h3>
-WER
+WER trung bình
 </h3>
+
 
 <strong>
 
@@ -366,10 +399,15 @@ report.tong_quan.WER_trung_binh
 </div>
 
 
+
 </div>
 
 
 
+
+
+
+{/* ================= CHART ================= */}
 
 
 <div className="section">
@@ -378,7 +416,6 @@ report.tong_quan.WER_trung_binh
 <h2>
 Thống kê lỗi tiếng Việt
 </h2>
-
 
 
 <div className="chart-box">
@@ -428,6 +465,10 @@ dataKey="value"
 
 
 
+
+{/* ================= TABLE ================= */}
+
+
 <div className="section">
 
 
@@ -437,25 +478,33 @@ Phân tích từng Audio
 
 
 
-<div>
+<div className="filter">
 
 
 <button
-onClick={()=>setFilter("all")}
+onClick={() =>
+setFilter("all")
+}
 >
 Tất cả
 </button>
 
 
+
 <button
-onClick={()=>setFilter("wrong")}
+onClick={() =>
+setFilter("wrong")
+}
 >
 Chỉ lỗi
 </button>
 
 
+
 <button
-onClick={()=>setFilter("correct")}
+onClick={() =>
+setFilter("correct")
+}
 >
 Chính xác
 </button>
@@ -465,21 +514,21 @@ Chính xác
 
 
 
-
-<br/>
-
-
 <input
+
+className="search"
 
 placeholder="Tìm kiếm câu..."
 
 value={search}
 
 onChange={
-e=>setSearch(e.target.value)
+e =>
+setSearch(e.target.value)
 }
 
 />
+
 
 
 
@@ -496,17 +545,21 @@ e=>setSearch(e.target.value)
 Audio
 </th>
 
+
 <th>
 Câu chuẩn
 </th>
+
 
 <th>
 Whisper
 </th>
 
+
 <th>
 Trạng thái
 </th>
+
 
 <th>
 Lỗi
@@ -524,7 +577,8 @@ Lỗi
 
 
 {
-filtered.map(
+
+data.map(
 (item,index)=>(
 
 
@@ -536,9 +590,11 @@ filtered.map(
 </td>
 
 
+
 <td>
 {item.ground_truth}
 </td>
+
 
 
 <td>
@@ -547,15 +603,34 @@ filtered.map(
 
 
 
+
+
 <td>
 
-{
-item.status==="Đúng"
+
+<span
+
+className={
+item.status === "Đúng"
 ?
-"✅ Đúng"
+"status-good"
 :
-"❌ Sai"
+"status-bad"
 }
+
+>
+
+
+{
+item.status === "Đúng"
+?
+"✓ Đúng"
+:
+"✗ Sai"
+}
+
+
+</span>
 
 
 </td>
@@ -563,30 +638,44 @@ item.status==="Đúng"
 
 
 
+
+
 <td>
 
 
 {
-item.errors.length===0
+
+item.errors.length === 0
 
 ?
 
-"Không lỗi"
+<span className="success">
+
+Không lỗi
+
+</span>
+
 
 :
 
 item.errors.map(
-(e,i)=>(
+(error,i)=>(
 
-<div key={i}>
 
-{translateError(e)}
+<div
+key={i}
+className="error-item"
+>
+
+{translateError(error)}
 
 </div>
 
+
 )
 
 )
+
 
 }
 
@@ -603,28 +692,31 @@ item.errors.map(
 
 )
 
+
 }
 
 
-
 </tbody>
+
 
 
 </table>
 
 
 
-</div>
-
-
 
 </div>
 
 
-);
+
+
+</div>
+
+  );
 
 
 }
+
 
 
 export default App;

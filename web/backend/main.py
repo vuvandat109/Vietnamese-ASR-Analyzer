@@ -213,3 +213,75 @@ def get_errors():
 # uvicorn main:app --reload
 #
 # ==================================
+# =====================================
+# PHÂN TÍCH LỖI THEO CÂU
+# =====================================
+
+@app.get("/analysis")
+def sentence_analysis():
+
+    import pandas as pd
+    import os
+
+
+    error_file = r"E:\ASR_Project\dataset\vietnamese_error_analysis.csv"
+
+
+    if not os.path.exists(error_file):
+
+        return {
+            "error": "Không tìm thấy file vietnamese_error_analysis.csv"
+        }
+
+
+
+    df = pd.read_csv(
+        error_file,
+        encoding="utf-8-sig"
+    )
+
+
+    df = df.fillna("")
+
+
+    result = []
+
+
+    # Gom theo từng audio
+    for audio, group in df.groupby("audio"):
+
+
+        ground_truth = group.iloc[0]["ground_truth"]
+
+        prediction = group.iloc[0]["prediction"]
+
+
+        errors = (
+            group["error_type"]
+            .unique()
+            .tolist()
+        )
+
+
+        result.append({
+
+            "audio": audio,
+
+            "ground_truth": ground_truth,
+
+            "prediction": prediction,
+
+            "errors": errors,
+
+            "total_error": len(group)
+
+        })
+
+
+    return {
+
+        "total_audio": len(result),
+
+        "data": result
+
+    }

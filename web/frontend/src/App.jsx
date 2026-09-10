@@ -13,486 +13,341 @@ import {
 import "./App.css";
 
 
-function App() {
+function App(){
 
 
-  const [report, setReport] = useState(null);
+const [report,setReport]=useState(null);
 
-  const [errors, setErrors] = useState([]);
+const [analysis,setAnalysis]=useState([]);
 
+const [loading,setLoading]=useState(true);
 
 
-  // ============================
-  // LẤY DỮ LIỆU BACKEND
-  // ============================
 
-  useEffect(() => {
+useEffect(()=>{
 
 
-    axios
-      .get(
-        "http://127.0.0.1:8000/report"
-      )
-      .then((res)=>{
+axios
+.get("http://127.0.0.1:8000/report")
+.then(res=>{
 
-        setReport(res.data);
+setReport(res.data);
 
-      })
-      .catch((err)=>{
+});
 
-        console.log(
-          "Lỗi lấy report:",
-          err
-        );
 
-      });
 
+axios
+.get("http://127.0.0.1:8000/analysis")
+.then(res=>{
 
 
-    axios
-      .get(
-        "http://127.0.0.1:8000/errors"
-      )
-      .then((res)=>{
+setAnalysis(
+res.data.data || []
+);
 
 
-        console.log(
-          "ERROR DATA:",
-          res.data
-        );
+setLoading(false);
 
 
-        setErrors(
-          res.data.data || []
-        );
+});
 
 
-      })
-      .catch((err)=>{
+},[]);
 
 
-        console.log(
-          "Lỗi lấy errors:",
-          err
-        );
 
 
-      });
+if(loading || !report){
 
+return (
 
+<h2>
+Đang tải dữ liệu...
+</h2>
 
-  }, []);
+)
 
+}
 
 
 
-  if(!report){
+const tongQuan =
+report.tong_quan;
 
-    return (
 
-      <h2>
-        Đang tải dữ liệu...
-      </h2>
 
-    );
+const loi =
+report.phan_tich_loi_tieng_viet;
 
-  }
 
 
+const chartData =
+Object
+.entries(loi)
+.map(
+([name,value])=>({
 
-  const tongQuan =
-    report.tong_quan;
+name,
+value
 
+})
+);
 
 
-  // ============================
-  // DỮ LIỆU BIỂU ĐỒ
-  // ============================
 
+return (
 
-  const loiTiengViet =
-    report.phan_tich_loi_tieng_viet;
+<div className="dashboard">
 
 
+<h1>
+Vietnamese ASR Error Analyzer
+</h1>
 
-  const chartData = Object
-    .entries(loiTiengViet)
-    .map(
-      ([name,value])=>({
 
-        name,
+<p className="subtitle">
+Whisper Vietnamese Speech Recognition Evaluation
+</p>
 
-        value
 
-      })
-    );
 
 
+<div className="cards">
 
 
+<div className="card">
 
-  // ============================
-  // HÀM LẤY GIÁ TRỊ AN TOÀN
-  // ============================
+<h3>
+Số Audio
+</h3>
 
+<strong>
+{tongQuan.so_luong_audio}
+</strong>
 
-  function getValue(
-    item,
-    keys
-  ){
+</div>
 
-    for(
-      let key of keys
-    ){
 
-      if(
-        item[key] !== undefined
-      ){
 
-        return item[key];
+<div className="card">
 
-      }
+<h3>
+WER
+</h3>
 
-    }
+<strong>
+{
+(tongQuan.WER_trung_binh*100)
+.toFixed(2)
+}%
 
+</strong>
 
-    return "";
+</div>
 
-  }
 
 
+<div className="card">
 
+<h3>
+CER
+</h3>
 
+<strong>
 
-  return (
+{
+(tongQuan.CER_trung_binh*100)
+.toFixed(2)
+}%
 
+</strong>
 
-    <div className="dashboard">
+</div>
 
 
-      <h1>
-        Vietnamese ASR Error Analyzer
-      </h1>
 
+</div>
 
-      <p className="subtitle">
-        Whisper Vietnamese Speech Recognition Evaluation
-      </p>
 
 
 
 
+<div className="section">
 
-      {/* ================= CARD ================= */}
+<h2>
+Phân tích lỗi tiếng Việt
+</h2>
 
 
-      <div className="cards">
+<div className="chart-box">
 
 
-        <div className="card">
+<ResponsiveContainer
+width="100%"
+height="100%"
+>
 
-          <h3>
-            Số Audio
-          </h3>
 
-          <strong>
-            {
-              tongQuan.so_luong_audio
-            }
-          </strong>
+<BarChart
+data={chartData}
+>
 
 
-        </div>
+<XAxis dataKey="name"/>
 
+<YAxis/>
 
+<Tooltip/>
 
+<Bar dataKey="value"/>
 
 
-        <div className="card">
+</BarChart>
 
-          <h3>
-            WER
-          </h3>
 
+</ResponsiveContainer>
 
-          <strong>
 
-            {
-              (
-                tongQuan.WER_trung_binh
-                *
-                100
-              )
-              .toFixed(2)
-            }%
+</div>
 
-          </strong>
 
+</div>
 
-        </div>
 
 
 
 
 
-        <div className="card">
 
-          <h3>
-            CER
-          </h3>
+<div className="section">
 
 
-          <strong>
+<h2>
+Phân tích theo Audio
+</h2>
 
-            {
-              (
-                tongQuan.CER_trung_binh
-                *
-                100
-              )
-              .toFixed(2)
-            }%
 
-          </strong>
 
+<table>
 
-        </div>
 
+<thead>
 
+<tr>
 
-      </div>
+<th>
+Audio
+</th>
 
+<th>
+Câu chuẩn
+</th>
 
+<th>
+Whisper
+</th>
 
+<th>
+Lỗi
+</th>
 
+</tr>
 
 
+</thead>
 
-      {/* ================= BIỂU ĐỒ ================= */}
 
 
-      <div className="section">
+<tbody>
 
 
-        <h2>
-          Phân tích lỗi tiếng Việt
-        </h2>
+{
 
+analysis.map(
+(item,index)=>(
 
-        <div
-          className="chart-box"
-        >
 
+<tr key={index}>
 
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-          >
 
+<td>
 
-            <BarChart
-              data={chartData}
-            >
+{item.audio}
 
+</td>
 
-              <XAxis
-                dataKey="name"
-              />
 
+<td>
 
-              <YAxis />
+{item.ground_truth}
 
+</td>
 
-              <Tooltip />
 
+<td>
 
-              <Bar
-                dataKey="value"
-              />
+{item.prediction}
 
+</td>
 
-            </BarChart>
 
 
-          </ResponsiveContainer>
+<td>
 
 
-        </div>
+{
+item.errors.map(
+(e,i)=>(
 
+<div key={i}>
 
-      </div>
+{e}
 
+</div>
 
+)
 
+)
+}
 
 
 
+</td>
 
 
-      {/* ================= BẢNG LỖI ================= */}
+</tr>
 
 
+)
 
-      <div className="section">
-
-
-        <h2>
-          Chi tiết lỗi nhận dạng
-        </h2>
-
-
-
-        <table>
-
-
-          <thead>
-
-            <tr>
-
-              <th>
-                Từ chuẩn
-              </th>
-
-
-              <th>
-                Whisper nhận dạng
-              </th>
-
-
-              <th>
-                Loại lỗi
-              </th>
-
-
-            </tr>
-
-
-          </thead>
-
-
-
-
-
-          <tbody>
-
-
-          {
-
-
-            errors.map(
-
-              (item,index)=>(
-
-
-
-                <tr
-                  key={index}
-                >
-
-
-
-                  <td>
-
-                    {
-                      getValue(
-                        item,
-                        [
-                          "reference",
-                          "REF",
-                          "ref",
-                          "tu_dung",
-                          "word"
-                        ]
-                      )
-                    }
-
-
-                  </td>
-
-
-
-
-                  <td>
-
-
-                    {
-                      getValue(
-                        item,
-                        [
-                          "hypothesis",
-                          "HYP",
-                          "hyp",
-                          "asr_nhan_dang",
-                          "prediction"
-                        ]
-                      )
-                    }
-
-
-                  </td>
-
-
-
-
-
-                  <td>
-
-
-                    {
-                      getValue(
-                        item,
-                        [
-                          "error_type",
-                          "TYPE",
-                          "loai_loi"
-                        ]
-                      )
-                    }
-
-
-                  </td>
-
-
-
-
-                </tr>
-
-
-
-              )
-
-
-            )
-
-
-
-          }
-
-
-
-          </tbody>
-
-
-
-        </table>
-
-
-
-      </div>
-
-
-
-
-
-
-    </div>
-
-
-  );
+)
 
 
 }
 
+
+
+</tbody>
+
+
+</table>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+);
+
+
+}
 
 
 export default App;

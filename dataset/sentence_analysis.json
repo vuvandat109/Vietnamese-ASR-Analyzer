@@ -1,0 +1,239 @@
+{
+  "total_audio": 20,
+  "data": [
+    {
+      "audio": "common_voice_vi_24358794.mp3",
+      "ground_truth": "Mày mà chạy nữa tao thề không chơi với mày nữa đâu",
+      "prediction": "Mày mà chảy nữa, tao thấy không chơi với mày nữa đâu.",
+      "wer": 0.1666666666666666,
+      "cer": 0.06,
+      "status": "Sai",
+      "errors": [
+        "tone_error",
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24362782.mp3",
+      "ground_truth": "vì giữa đường không bắt được xe ôm khác",
+      "prediction": "Vì giữa đường không bắt được xe ơn khác?",
+      "wer": 0.1111111111111111,
+      "cer": 0.0512820512820512,
+      "status": "Sai",
+      "errors": [
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_23936355.mp3",
+      "ground_truth": "Già làng liền nói",
+      "prediction": "Giả lãng liệu nói",
+      "wer": 0.75,
+      "cer": 0.2352941176470588,
+      "status": "Sai",
+      "errors": [
+        "tone_error",
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_42788631.mp3",
+      "ground_truth": "Thu về cho cô không ít tiền bạc mối quan hệ tốt",
+      "prediction": "2V cho cô không ủ tiên bạc mối quan hề tốt",
+      "wer": 0.4166666666666667,
+      "cer": 0.1914893617021276,
+      "status": "Sai",
+      "errors": [
+        "non_vietnamese_token",
+        "multi_component_error",
+        "tone_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_30171307.mp3",
+      "ground_truth": "Và ta tiếp chặng hành trình",
+      "prediction": "và ta biếp chẳng hình chương.",
+      "wer": 0.6666666666666666,
+      "cer": 0.2962962962962963,
+      "status": "Sai",
+      "errors": [
+        "initial_consonant_error",
+        "tone_error",
+        "nucleus_error",
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24425726.mp3",
+      "ground_truth": "Chinh đứng Tìm máy tính cửa gỗ đang được kéo ra",
+      "prediction": "Chình đứng tìm mại tính, cửa rõ đang được kéo ra.",
+      "wer": 0.2727272727272727,
+      "cer": 0.1063829787234042,
+      "status": "Sai",
+      "errors": [
+        "tone_error",
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24124158.mp3",
+      "ground_truth": "Và câu thơ đâu còn mãi ngày sau",
+      "prediction": "và câu thơ đâu còn mấy ngày 6",
+      "wer": 0.25,
+      "cer": 0.1612903225806451,
+      "status": "Sai",
+      "errors": [
+        "multi_component_error",
+        "non_vietnamese_token"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24358781.mp3",
+      "ground_truth": "Trên bầu trời xanh",
+      "prediction": "Linh Bộ Trời Sang",
+      "wer": 0.75,
+      "cer": 0.4444444444444444,
+      "status": "Sai",
+      "errors": [
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24106634.mp3",
+      "ground_truth": "Khi còn sống con bé yếu kém hơn mọi người",
+      "prediction": "Khi còn sống, còn bé yêu cem hư mọi người.",
+      "wer": 0.4,
+      "cer": 0.1463414634146341,
+      "status": "Sai",
+      "errors": [
+        "tone_error",
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24304405.mp3",
+      "ground_truth": "Tôi ngậm cái bánh mì nhai ngấu nghiến",
+      "prediction": "Tôi ngậm cái bánh mì, nhà ngũ nhín",
+      "wer": 0.375,
+      "cer": 0.1891891891891892,
+      "status": "Sai",
+      "errors": [
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_23933072.mp3",
+      "ground_truth": "Là anh đây chỉ thăm hỏi đôi lời",
+      "prediction": "Lãn đây chỉ tham hội đôi lời.",
+      "wer": 0.5,
+      "cer": 0.1935483870967742,
+      "status": "Sai",
+      "errors": [
+        "multi_component_error",
+        "nucleus_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24304490.mp3",
+      "ground_truth": "Giai đoạn lãnh đạo",
+      "prediction": "Giay đoạn lánh đạo.",
+      "wer": 0.5,
+      "cer": 0.1111111111111111,
+      "status": "Sai",
+      "errors": [
+        "final_consonant_error",
+        "tone_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24144207.mp3",
+      "ground_truth": "Cao đến ngực người trưởng thành",
+      "prediction": "Cào đến ngực người chữa thân.",
+      "wer": 0.5,
+      "cer": 0.2903225806451613,
+      "status": "Sai",
+      "errors": [
+        "tone_error",
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_40249427.mp3",
+      "ground_truth": "Tự nhiên không đâu vào đâu lại sang nói chuyện này",
+      "prediction": "Tự nhiên không đâu vào đâu lại xe nói chuyện này.",
+      "wer": 0.0909090909090909,
+      "cer": 0.08,
+      "status": "Sai",
+      "errors": [
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_24363084.mp3",
+      "ground_truth": "Nó lại khỏe mạnh trở lại",
+      "prediction": "Nó lại quay mạnh chờ lại.",
+      "wer": 0.3333333333333333,
+      "cer": 0.2916666666666667,
+      "status": "Sai",
+      "errors": [
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_25158138.mp3",
+      "ground_truth": "Nơi cậu đã nằm đêm qua",
+      "prediction": "Nơi cậu đã nằm đêm qua",
+      "wer": 0.0,
+      "cer": 0.0,
+      "status": "Đúng",
+      "errors": []
+    },
+    {
+      "audio": "common_voice_vi_24362884.mp3",
+      "ground_truth": "Thì bà ấy cũng không nói lời nào và ra đi như vậy",
+      "prediction": "thì bởi cũng không nói lời nào và ra đi như vậy.",
+      "wer": 0.1538461538461538,
+      "cer": 0.0816326530612244,
+      "status": "Sai",
+      "errors": [
+        "multi_component_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_23901409.mp3",
+      "ground_truth": "Không Tao không muốn",
+      "prediction": "Không tạo khùng muống.",
+      "wer": 0.75,
+      "cer": 0.15,
+      "status": "Sai",
+      "errors": [
+        "tone_error",
+        "multi_component_error",
+        "final_consonant_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_23380408.mp3",
+      "ground_truth": "Thấy ánh mặt trời",
+      "prediction": "Thấy anh mặc trời.",
+      "wer": 0.5,
+      "cer": 0.1176470588235294,
+      "status": "Sai",
+      "errors": [
+        "tone_error",
+        "final_consonant_error"
+      ]
+    },
+    {
+      "audio": "common_voice_vi_42788758.mp3",
+      "ground_truth": "Cây cỏ tỉnh táo",
+      "prediction": "Cây cò tình tạo",
+      "wer": 0.75,
+      "cer": 0.2,
+      "status": "Sai",
+      "errors": [
+        "tone_error"
+      ]
+    }
+  ]
+}

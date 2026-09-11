@@ -1,161 +1,388 @@
 import pandas as pd
 import json
-import os
-
-
-# =========================
-# FILE INPUT
-# =========================
-
-asr_file = r"E:\ASR_Project\dataset\asr_results.csv"
-
-error_file = r"E:\ASR_Project\dataset\vietnamese_error_analysis.csv"
-
-
-# OUTPUT
-
-output_file = r"E:\ASR_Project\dataset\sentence_analysis.json"
+import sys
 
 
 
-# =========================
-# ĐỌC DỮ LIỆU
-# =========================
+# =====================================
+# IMPORT BACKEND MODULE
+# =====================================
+
+sys.path.append(
+    r"E:\ASR_Project\web\backend"
+)
+
+
+from audio_analyzer import analyze_sentence_phoneme
+
+
+
+
+
+# =====================================
+# FILE PATH
+# =====================================
+
+
+ASR_FILE = (
+
+    r"E:\ASR_Project\dataset\asr_results.csv"
+
+)
+
+
+
+ERROR_FILE = (
+
+    r"E:\ASR_Project\dataset\vietnamese_error_analysis.csv"
+
+)
+
+
+
+OUTPUT_FILE = (
+
+    r"E:\ASR_Project\dataset\sentence_analysis.json"
+
+)
+
+
+
+
+
+
+
+# =====================================
+# LOAD DATA
+# =====================================
+
+
+print("Loading dataset...")
+
+
 
 df_asr = pd.read_csv(
-    asr_file,
+
+    ASR_FILE,
+
     encoding="utf-8-sig"
+
 )
+
 
 
 df_error = pd.read_csv(
-    error_file,
+
+    ERROR_FILE,
+
     encoding="utf-8-sig"
+
 )
 
 
 
-# =========================
-# MAP LỖI THEO AUDIO
-# =========================
+
+
+print(
+
+    "ASR samples:",
+
+    len(df_asr)
+
+)
+
+
+
+
+
+
+
+# =====================================
+# ERROR MAP
+# =====================================
+
 
 error_map = {}
 
 
 
+
 for audio, group in df_error.groupby("audio"):
 
-    errors = (
+
+    error_map[audio] = (
+
         group["error_type"]
+
+        .dropna()
+
         .unique()
+
         .tolist()
+
     )
 
 
-    error_map[audio] = errors
 
 
 
-# =========================
-# TẠO SENTENCE ANALYSIS
-# =========================
+
+
+# =====================================
+# CREATE ANALYSIS
+# =====================================
+
 
 result = []
 
 
 
-for _, row in df_asr.iterrows():
+
+
+for index,row in df_asr.iterrows():
+
+
 
     audio = row["audio"]
 
 
+
+    reference = str(
+        row["ground_truth"]
+    ).strip()
+
+
+
+    prediction = str(
+        row["prediction"]
+    ).strip()
+
+
+
+
+
     errors = error_map.get(
+
         audio,
+
         []
+
     )
 
 
-    if len(errors) == 0:
 
-        status = "Đúng"
+
+
+    status = (
+
+        "Đúng"
+
+        if len(errors)==0
+
+        else
+
+        "Sai"
+
+    )
+
+
+
+
+
+    # ==============================
+    # PHONEME ANALYSIS
+    # ==============================
+
+
+    if status == "Sai":
+
+
+        try:
+
+
+            word_analysis = (
+
+                analyze_sentence_phoneme(
+
+                    reference,
+
+                    prediction
+
+                )
+
+            )
+
+
+        except Exception as e:
+
+
+            print(
+
+                "Phoneme error:",
+
+                audio,
+
+                e
+
+            )
+
+
+            word_analysis = []
+
+
 
     else:
 
-        status = "Sai"
+
+        word_analysis = []
 
 
 
-    result.append({
 
-        "audio": audio,
+
+
+
+
+    item = {
+
+
+
+        "audio":
+
+        audio,
+
+
 
         "ground_truth":
-            row["ground_truth"],
+
+        reference,
+
+
 
         "prediction":
-            row["prediction"],
+
+        prediction,
+
+
 
         "wer":
-            float(row["wer"]),
+
+        float(row["wer"]),
+
+
 
         "cer":
-            float(row["cer"]),
+
+        float(row["cer"]),
+
+
 
         "status":
-            status,
+
+        status,
+
+
 
         "errors":
-            errors
 
-    })
-
+        errors,
 
 
 
-data = {
+        "word_analysis":
+
+        word_analysis
+
+
+
+    }
+
+
+
+    result.append(item)
+
+
+
+
+
+
+# =====================================
+# OUTPUT JSON
+# =====================================
+
+
+output = {
+
+
 
     "total_audio":
-        len(result),
+
+    len(result),
+
+
 
     "data":
-        result
+
+    result
+
+
 
 }
 
 
 
-# =========================
-# LƯU JSON
-# =========================
+
+
 
 with open(
-    output_file,
+
+    OUTPUT_FILE,
+
     "w",
+
     encoding="utf-8"
+
 ) as f:
 
+
+
     json.dump(
-        data,
+
+        output,
+
         f,
+
         ensure_ascii=False,
+
         indent=2
+
     )
 
 
 
-print(
-    "===== DONE ====="
-)
+
+
+
+
+print("==========================")
+
+print("DONE")
 
 print(
-    "Tong audio:",
+
+    "Total:",
+
     len(result)
+
 )
 
-print(
-    "Da tao:"
-)
 
 print(
-    output_file
+
+    "Saved:",
+
+    OUTPUT_FILE
+
 )
+
+print("==========================")

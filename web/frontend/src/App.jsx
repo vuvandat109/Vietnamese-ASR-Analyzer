@@ -1223,23 +1223,14 @@ CER
 
 
 <h3>
-
 Phân loại lỗi
-
 </h3>
 
 
-
-
-
 {
-
-
 selectedAudio.errors.length===0
 
-
 ?
-
 
 <span className="success">
 
@@ -1248,9 +1239,7 @@ Không có lỗi
 </span>
 
 
-
 :
-
 
 selectedAudio.errors.map(
 
@@ -1274,12 +1263,353 @@ className="error-badge"
 
 )
 
+}
+
+
+
+
+
+{/* =========================
+    WORD ANALYSIS DETAIL
+========================= */}
+
+
+{
+
+selectedAudio.word_analysis &&
+
+selectedAudio.word_analysis.length > 0 &&
+
+(
+
+
+<div className="word-analysis">
+
+
+<h3>
+
+Chi tiết lỗi phát âm
+
+</h3>
+
+
+
+{
+
+
+selectedAudio.word_analysis.map(
+
+(item,index)=>(
+
+
+<div
+
+key={index}
+
+className="word-card"
+
+>
+
+
+
+<h4>
+
+{item.reference}
+
+&nbsp; → &nbsp;
+
+{item.prediction}
+
+</h4>
+
+
+
+
+
+<div className="phoneme-row">
+
+
+<span>
+
+Âm đầu:
+
+</span>
+
+
+<span>
+
+{item.detail.initial.reference}
+
+→
+
+{item.detail.initial.prediction}
+
+</span>
+
+
+
+<span
+
+className={
+
+item.detail.initial.correct
+
+?
+
+"correct"
+
+:
+
+"incorrect"
+
+}
+
+>
+
+{
+
+item.detail.initial.correct
+
+?
+
+"✓ Đúng"
+
+:
+
+"✗ Sai"
+
+}
+
+</span>
+
+
+</div>
+
+
+
+
+
+
+
+<div className="phoneme-row">
+
+
+<span>
+
+Âm chính:
+
+</span>
+
+
+<span>
+
+{item.detail.nucleus.reference}
+
+→
+
+{item.detail.nucleus.prediction}
+
+</span>
+
+
+
+<span
+
+className={
+
+item.detail.nucleus.correct
+
+?
+
+"correct"
+
+:
+
+"incorrect"
+
+}
+
+>
+
+{
+
+item.detail.nucleus.correct
+
+?
+
+"✓ Đúng"
+
+:
+
+"✗ Sai"
+
+}
+
+</span>
+
+
+</div>
+
+
+
+
+
+
+
+<div className="phoneme-row">
+
+
+<span>
+
+Âm cuối:
+
+</span>
+
+
+<span>
+
+{
+
+item.detail.final.reference || "-"
+
+}
+
+→
+
+{
+
+item.detail.final.prediction || "-"
+
+}
+
+</span>
+
+
+
+<span
+
+className={
+
+item.detail.final.correct
+
+?
+
+"correct"
+
+:
+
+"incorrect"
+
+}
+
+>
+
+{
+
+item.detail.final.correct
+
+?
+
+"✓ Đúng"
+
+:
+
+"✗ Sai"
+
+}
+
+</span>
+
+
+</div>
+
+
+
+
+
+
+
+<div className="phoneme-row">
+
+
+<span>
+
+Thanh điệu:
+
+</span>
+
+
+<span>
+
+{item.detail.tone.reference}
+
+→
+
+{item.detail.tone.prediction}
+
+</span>
+
+
+
+<span
+
+className={
+
+item.detail.tone.correct
+
+?
+
+"correct"
+
+:
+
+"incorrect"
+
+}
+
+>
+
+{
+
+item.detail.tone.correct
+
+?
+
+"✓ Đúng"
+
+:
+
+"✗ Sai"
+
+}
+
+</span>
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+)
+
+)
 
 
 }
 
 
+</div>
 
+
+)
+
+
+}
 
 
 

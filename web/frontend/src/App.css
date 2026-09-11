@@ -728,3 +728,65 @@ td:nth-child(7) {
     }
 
 }
+.word-analysis{
+    margin-top:20px;
+}
+
+
+.word-card{
+
+    background:#f9fafb;
+
+    padding:15px;
+
+    border-radius:10px;
+
+    margin-bottom:15px;
+
+    border:1px solid #e5e7eb;
+
+}
+
+
+
+.word-card h4{
+
+    margin-bottom:15px;
+
+    color:#111827;
+
+}
+
+
+
+.phoneme-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    padding:8px 0;
+
+    border-bottom:1px solid #eee;
+
+}
+
+
+
+.correct{
+
+    color:#16a34a;
+
+    font-weight:bold;
+
+}
+
+
+
+.incorrect{
+
+    color:#dc2626;
+
+    font-weight:bold;
+
+}

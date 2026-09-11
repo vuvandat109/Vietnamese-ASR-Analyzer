@@ -28,17 +28,11 @@ function App() {
 
 
 
-  // =========================
-  // LOAD API
-  // =========================
-
   useEffect(() => {
 
 
     axios
-      .get(
-        "http://127.0.0.1:8000/report"
-      )
+      .get("http://127.0.0.1:8000/report")
       .then(res => {
 
         setReport(res.data);
@@ -48,9 +42,7 @@ function App() {
 
 
     axios
-      .get(
-        "http://127.0.0.1:8000/analysis"
-      )
+      .get("http://127.0.0.1:8000/analysis")
       .then(res => {
 
 
@@ -61,9 +53,7 @@ function App() {
 
         setLoading(false);
 
-
       });
-
 
 
   }, []);
@@ -71,18 +61,18 @@ function App() {
 
 
 
-
-  if (
+  if(
     loading ||
     !report
-  ) {
-
+  ){
 
     return (
 
-      <h2>
+      <div className="loading">
+
         Đang tải dữ liệu...
-      </h2>
+
+      </div>
 
     );
 
@@ -92,40 +82,60 @@ function App() {
 
 
 
-  // =========================
+  // =============================
   // THỐNG KÊ
-  // =========================
+  // =============================
 
 
-  const tongAudio =
+  const totalAudio =
     analysis.length;
 
 
 
-  const dung =
+  const correct =
     analysis.filter(
       item =>
-        item.status === "Đúng"
+      item.status === "Đúng"
     ).length;
 
 
 
-  const sai =
+  const wrong =
     analysis.filter(
       item =>
-        item.status === "Sai"
+      item.status === "Sai"
     ).length;
 
 
 
+  const avgWER =
+    (
+      report.tong_quan.WER_trung_binh
+      *
+      100
+    )
+    .toFixed(2);
 
 
-  // =========================
+
+  const avgCER =
+    (
+      report.tong_quan.CER_trung_binh
+      *
+      100
+    )
+    .toFixed(2);
+
+
+
+
+
+  // =============================
   // DỊCH LỖI
-  // =========================
+  // =============================
 
 
-  function translateError(error) {
+  function translateError(error){
 
 
     const map = {
@@ -152,17 +162,13 @@ function App() {
 
 
       non_vietnamese_token:
-      "Token không phải tiếng Việt"
+      "Token ngoài tiếng Việt"
 
 
     };
 
 
-    return (
-      map[error]
-      ||
-      error
-    );
+    return map[error] || error;
 
 
   }
@@ -171,25 +177,22 @@ function App() {
 
 
 
-  // =========================
-  // FILTER
-  // =========================
+  // =============================
+  // FILTER DATA
+  // =============================
 
 
-  let data =
-    analysis;
+  let tableData = analysis;
 
 
 
-  if (
-    filter === "correct"
-  ) {
+  if(filter==="wrong"){
 
 
-    data =
-      data.filter(
+    tableData =
+      tableData.filter(
         item =>
-          item.status === "Đúng"
+        item.status==="Sai"
       );
 
 
@@ -197,15 +200,13 @@ function App() {
 
 
 
-  if (
-    filter === "wrong"
-  ) {
+  if(filter==="correct"){
 
 
-    data =
-      data.filter(
+    tableData =
+      tableData.filter(
         item =>
-          item.status === "Sai"
+        item.status==="Đúng"
       );
 
 
@@ -214,14 +215,12 @@ function App() {
 
 
 
-
-  if (
-    search.trim() !== ""
-  ) {
+  if(search.trim()){
 
 
-    data =
-      data.filter(item =>
+    tableData =
+      tableData.filter(
+        item =>
 
 
         item.ground_truth
@@ -239,7 +238,6 @@ function App() {
           search.toLowerCase()
         )
 
-
       );
 
 
@@ -249,29 +247,26 @@ function App() {
 
 
 
-  // =========================
-  // BIỂU ĐỒ LỖI
-  // =========================
+  // =============================
+  // ERROR CHART
+  // =============================
 
 
-  const errorMap = {};
+  const errorCount = {};
 
 
 
-  analysis.forEach(item => {
+  analysis.forEach(item=>{
 
 
-    item.errors.forEach(error => {
+    item.errors.forEach(error=>{
 
 
-      errorMap[error] =
+      errorCount[error] =
       (
-        errorMap[error]
-        ||
-        0
+        errorCount[error] || 0
       )
-      +
-      1;
+      +1;
 
 
     });
@@ -282,20 +277,27 @@ function App() {
 
 
   const chartData =
+
     Object
-    .entries(errorMap)
+    .entries(errorCount)
     .map(
-      ([name,value]) => ({
+      ([name,value])=>({
 
         name:
         translateError(name),
 
-        value
+        value,
+
+        percent:
+        (
+          value /
+          analysis.length *
+          100
+        )
+        .toFixed(1)
 
       })
     );
-
-
 
 
 
@@ -306,20 +308,17 @@ function App() {
 <div className="dashboard">
 
 
-
 <h1>
 Vietnamese ASR Error Analyzer
 </h1>
 
 
 <p className="subtitle">
-Whisper Vietnamese Speech Recognition Evaluation
+Whisper Vietnamese Speech Recognition Evaluation Dashboard
 </p>
 
 
 
-
-{/* ================= CARD ================= */}
 
 
 <div className="cards">
@@ -333,10 +332,11 @@ Tổng Audio
 </h3>
 
 <strong>
-{tongAudio}
+{totalAudio}
 </strong>
 
 </div>
+
 
 
 
@@ -349,11 +349,12 @@ Nhận dạng đúng
 
 <strong className="green">
 
-{dung}
+{correct}
 
 </strong>
 
 </div>
+
 
 
 
@@ -366,11 +367,12 @@ Có lỗi
 
 <strong className="red">
 
-{sai}
+{wrong}
 
 </strong>
 
 </div>
+
 
 
 
@@ -378,43 +380,31 @@ Có lỗi
 <div className="card">
 
 <h3>
-WER trung bình
+WER / CER
 </h3>
-
 
 <strong>
 
-{
-(
-report.tong_quan.WER_trung_binh
-*
-100
-)
-.toFixed(2)
-}%
+{avgWER}% / {avgCER}%
 
 </strong>
 
-
-</div>
-
-
-
 </div>
 
 
 
 
-
-
-{/* ================= CHART ================= */}
+</div>
+// =============================
+// ERROR CHART
+// =============================
 
 
 <div className="section">
 
 
 <h2>
-Thống kê lỗi tiếng Việt
+Phân bố lỗi tiếng Việt
 </h2>
 
 
@@ -440,7 +430,14 @@ dataKey="name"
 <YAxis/>
 
 
-<Tooltip/>
+<Tooltip
+formatter={
+(value,name,item)=>[
+`${value} lỗi (${item.payload.percent}%)`,
+"Lỗi"
+]
+}
+/>
 
 
 <Bar
@@ -463,10 +460,10 @@ dataKey="value"
 
 
 
+{/* =============================
+    TABLE ANALYSIS
+============================= */}
 
-
-
-{/* ================= TABLE ================= */}
 
 
 <div className="section">
@@ -475,6 +472,7 @@ dataKey="value"
 <h2>
 Phân tích từng Audio
 </h2>
+
 
 
 
@@ -514,11 +512,13 @@ Chính xác
 
 
 
+
+
 <input
 
 className="search"
 
-placeholder="Tìm kiếm câu..."
+placeholder="Tìm kiếm câu nhận dạng..."
 
 value={search}
 
@@ -534,12 +534,14 @@ setSearch(e.target.value)
 
 
 
+
 <table>
 
 
 <thead>
 
 <tr>
+
 
 <th>
 Audio
@@ -557,6 +559,16 @@ Whisper
 
 
 <th>
+WER
+</th>
+
+
+<th>
+CER
+</th>
+
+
+<th>
 Trạng thái
 </th>
 
@@ -566,9 +578,12 @@ Lỗi
 </th>
 
 
+
 </tr>
 
 </thead>
+
+
 
 
 
@@ -578,28 +593,102 @@ Lỗi
 
 {
 
-data.map(
+tableData.map(
+
 (item,index)=>(
 
 
-<tr key={index}>
+<tr
+key={index}
+>
+
+
 
 
 <td>
+
 {item.audio}
+
 </td>
 
 
 
+
+
 <td>
+
 {item.ground_truth}
+
 </td>
+
+
 
 
 
 <td>
+
 {item.prediction}
+
 </td>
+
+
+
+
+
+<td>
+
+{
+
+item.wer !== undefined
+
+?
+
+(
+item.wer * 100
+)
+.toFixed(2)
++
+
+"%"
+
+:
+
+"-"
+
+}
+
+</td>
+
+
+
+
+
+
+<td>
+
+{
+
+item.cer !== undefined
+
+?
+
+(
+item.cer * 100
+)
+.toFixed(2)
++
+
+"%"
+
+:
+
+"-"
+
+}
+
+</td>
+
+
 
 
 
@@ -611,29 +700,43 @@ data.map(
 <span
 
 className={
-item.status === "Đúng"
+
+item.status==="Đúng"
+
 ?
+
 "status-good"
+
 :
+
 "status-bad"
+
 }
 
 >
 
 
 {
-item.status === "Đúng"
+
+item.status==="Đúng"
+
 ?
+
 "✓ Đúng"
+
 :
+
 "✗ Sai"
+
 }
 
 
 </span>
 
 
+
 </td>
+
 
 
 
@@ -645,9 +748,10 @@ item.status === "Đúng"
 
 {
 
-item.errors.length === 0
+item.errors.length===0
 
 ?
+
 
 <span className="success">
 
@@ -658,21 +762,27 @@ Không lỗi
 
 :
 
+
 item.errors.map(
+
 (error,i)=>(
 
 
-<div
+<span
+
 key={i}
-className="error-item"
+
+className="error-badge"
+
 >
 
 {translateError(error)}
 
-</div>
+</span>
 
 
 )
+
 
 )
 
@@ -685,10 +795,14 @@ className="error-item"
 
 
 
+
+
+
 </tr>
 
 
 )
+
 
 )
 
@@ -696,21 +810,22 @@ className="error-item"
 }
 
 
-</tbody>
 
+</tbody>
 
 
 </table>
 
 
 
-
 </div>
 
 
 
 
+
 </div>
+
 
   );
 

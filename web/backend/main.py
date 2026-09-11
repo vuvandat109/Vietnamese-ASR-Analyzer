@@ -1,38 +1,71 @@
-from fastapi import FastAPI
+from fastapi import (
+    FastAPI,
+    UploadFile,
+    File,
+    Form
+)
+
 from fastapi.middleware.cors import CORSMiddleware
+
 
 import json
 import pandas as pd
 import os
+import shutil
+import uuid
 
 
-# =====================================
-# KHỞI TẠO FASTAPI
-# =====================================
 
-app = FastAPI(
-    title="Vietnamese ASR Analyzer API",
-    version="4.0"
+from whisper_engine import transcribe_audio
+
+from audio_analyzer import (
+    calculate_score,
+    simple_error_check
 )
 
 
 
+
+
 # =====================================
-# CHO PHÉP REACT GỌI API
+# FASTAPI
+# =====================================
+
+app = FastAPI(
+
+    title="Vietnamese ASR Analyzer API",
+
+    version="6.0"
+
+)
+
+
+
+
+
+# =====================================
+# CORS
 # =====================================
 
 app.add_middleware(
 
     CORSMiddleware,
 
+
     allow_origins=[
+
         "http://localhost:5173",
+
         "http://localhost:5174"
+
     ],
+
 
     allow_credentials=True,
 
+
     allow_methods=["*"],
+
 
     allow_headers=["*"]
 
@@ -40,42 +73,86 @@ app.add_middleware(
 
 
 
+
+
+
 # =====================================
-# ĐƯỜNG DẪN DATASET
+# PATH
 # =====================================
+
 
 BASE_DIR = r"E:\ASR_Project\dataset"
 
 
-REPORT_FILE = os.path.join(
-    BASE_DIR,
-    "summary_report.json"
+UPLOAD_DIR = (
+    r"E:\ASR_Project\web\backend\uploads"
 )
+
+
+
+REPORT_FILE = os.path.join(
+
+    BASE_DIR,
+
+    "summary_report.json"
+
+)
+
 
 
 ERROR_FILE = os.path.join(
+
     BASE_DIR,
+
     "vietnamese_error_analysis.csv"
+
 )
+
 
 
 ANALYSIS_FILE = os.path.join(
+
     BASE_DIR,
+
     "sentence_analysis.json"
+
 )
 
 
 
+
+
+# tạo thư mục upload nếu chưa có
+
+os.makedirs(
+
+    UPLOAD_DIR,
+
+    exist_ok=True
+
+)
+
+
+
+
+
+
+
+
 # =====================================
-# TRANG KIỂM TRA
+# HOME
 # =====================================
 
+
 @app.get("/")
+
 def home():
+
 
     return {
 
         "message":
+
         "Vietnamese ASR Analyzer API running"
 
     }
@@ -83,11 +160,17 @@ def home():
 
 
 
+
+
+
+
 # =====================================
-# LẤY BÁO CÁO TỔNG QUAN
+# REPORT
 # =====================================
 
+
 @app.get("/report")
+
 def get_report():
 
 
@@ -96,31 +179,40 @@ def get_report():
         return {
 
             "error":
+
             "Không tìm thấy summary_report.json"
 
         }
 
 
+
     with open(
+
         REPORT_FILE,
+
         "r",
+
         encoding="utf-8"
+
     ) as f:
 
-        data = json.load(f)
+
+        return json.load(f)
 
 
-    return data
+
 
 
 
 
 
 # =====================================
-# LẤY LỖI TOKEN CHI TIẾT
+# ERROR DETAIL
 # =====================================
+
 
 @app.get("/errors")
+
 def get_errors():
 
 
@@ -129,7 +221,8 @@ def get_errors():
         return {
 
             "error":
-            "Không tìm thấy vietnamese_error_analysis.csv"
+
+            "Không tìm thấy file lỗi"
 
         }
 
@@ -142,6 +235,7 @@ def get_errors():
         encoding="utf-8-sig"
 
     )
+
 
 
     df = df.fillna("")
@@ -157,32 +251,41 @@ def get_errors():
 
         result.append({
 
+
             "audio":
+
             row.get(
                 "audio",
                 ""
             ),
 
 
+
             "reference":
+
             row.get(
                 "reference_word",
                 ""
             ),
 
 
+
             "hypothesis":
+
             row.get(
                 "hypothesis_word",
                 ""
             ),
 
 
+
             "error_type":
+
             row.get(
                 "error_type",
                 ""
             )
+
 
         })
 
@@ -190,12 +293,17 @@ def get_errors():
 
     return {
 
+
         "total":
+
         len(result),
 
 
+
         "data":
+
         result
+
 
     }
 
@@ -203,11 +311,17 @@ def get_errors():
 
 
 
+
+
+
+
 # =====================================
-# PHÂN TÍCH THEO CÂU (V4)
+# SENTENCE ANALYSIS
 # =====================================
 
+
 @app.get("/analysis")
+
 def sentence_analysis():
 
 
@@ -216,6 +330,7 @@ def sentence_analysis():
         return {
 
             "error":
+
             "Không tìm thấy sentence_analysis.json"
 
         }
@@ -233,21 +348,24 @@ def sentence_analysis():
     ) as f:
 
 
-        data = json.load(f)
+        return json.load(f)
 
 
 
-    return data
+
+
 
 
 
 
 
 # =====================================
-# CHẠY KIỂM TRA
+# HEALTH CHECK
 # =====================================
+
 
 @app.get("/health")
+
 def health():
 
 
@@ -255,18 +373,209 @@ def health():
 
 
         "status":
+
         "OK",
 
 
         "report":
+
         os.path.exists(REPORT_FILE),
 
 
         "errors":
+
         os.path.exists(ERROR_FILE),
 
 
         "analysis":
-        os.path.exists(ANALYSIS_FILE)
+
+        os.path.exists(ANALYSIS_FILE),
+
+
+        "whisper":
+
+        True
+
+    }
+
+
+
+
+
+
+
+
+
+# =====================================
+# V6 UPLOAD AUDIO ANALYZE
+# =====================================
+
+
+@app.post("/upload-analyze")
+
+async def upload_analyze(
+
+
+    audio: UploadFile = File(...),
+
+
+    reference: str = Form(...)
+
+
+):
+
+
+    # tạo tên file
+
+
+    filename = (
+
+        str(uuid.uuid4())
+
+        +
+
+        "_"
+
+        +
+
+        audio.filename
+
+    )
+
+
+
+    save_path = os.path.join(
+
+        UPLOAD_DIR,
+
+        filename
+
+    )
+
+
+
+
+    # lưu audio
+
+
+    with open(
+
+        save_path,
+
+        "wb"
+
+    ) as buffer:
+
+
+        shutil.copyfileobj(
+
+            audio.file,
+
+            buffer
+
+        )
+
+
+
+
+
+    # Whisper nhận dạng
+
+
+    prediction = transcribe_audio(
+
+        save_path
+
+    )
+
+
+
+
+
+    # WER CER
+
+
+    score = calculate_score(
+
+        reference,
+
+        prediction
+
+    )
+
+
+
+
+
+    # lỗi
+
+
+    errors = simple_error_check(
+
+        reference,
+
+        prediction
+
+    )
+
+
+
+
+
+
+    return {
+
+
+
+        "audio":
+
+        audio.filename,
+
+
+
+        "ground_truth":
+
+        reference,
+
+
+
+        "prediction":
+
+        prediction,
+
+
+
+        "wer":
+
+        score["wer"],
+
+
+
+        "cer":
+
+        score["cer"],
+
+
+
+        "status":
+
+        (
+
+            "Đúng"
+
+            if len(errors)==0
+
+            else
+
+            "Sai"
+
+        ),
+
+
+
+        "errors":
+
+        errors
+
 
     }

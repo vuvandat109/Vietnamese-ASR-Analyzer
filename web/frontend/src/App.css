@@ -1,66 +1,94 @@
 body {
 
-margin:0;
+  margin:0;
 
-font-family:
-Arial,
-sans-serif;
+  font-family:
+  "Segoe UI",
+  Arial,
+  sans-serif;
 
-background:#f3f4f6;
+  background:#f1f5f9;
 
 }
+
 
 
 
 .dashboard {
 
-padding:30px;
+  padding:35px;
+
+  max-width:1600px;
+
+  margin:auto;
 
 }
+
 
 
 
 h1 {
 
-color:#111827;
+  margin-bottom:5px;
+
+  color:#0f172a;
+
+  font-size:36px;
 
 }
+
 
 
 
 .subtitle {
 
-color:#6b7280;
+  color:#64748b;
+
+  margin-bottom:30px;
+
+  font-size:18px;
 
 }
 
 
+
+
+
+/* =====================
+   CARD
+===================== */
 
 
 .cards {
 
-display:grid;
+  display:grid;
 
-grid-template-columns:
-repeat(4,1fr);
+  grid-template-columns:
+  repeat(4,1fr);
 
-gap:20px;
+  gap:20px;
 
 }
+
 
 
 
 .card {
 
-background:white;
 
-padding:25px;
+  background:white;
 
-border-radius:12px;
+  padding:25px;
 
-box-shadow:
-0 4px 12px
-rgba(0,0,0,0.08);
+  border-radius:18px;
+
+  box-shadow:
+  0 8px 25px
+  rgba(15,23,42,0.08);
+
+
+  border-left:
+  5px solid #2563eb;
 
 }
 
@@ -68,7 +96,11 @@ rgba(0,0,0,0.08);
 
 .card h3 {
 
-color:#6b7280;
+  color:#64748b;
+
+  margin-top:0;
+
+  font-size:16px;
 
 }
 
@@ -76,7 +108,10 @@ color:#6b7280;
 
 .card strong {
 
-font-size:32px;
+
+  font-size:36px;
+
+  color:#0f172a;
 
 }
 
@@ -84,7 +119,7 @@ font-size:32px;
 
 .green {
 
-color:#16a34a;
+  color:#16a34a !important;
 
 }
 
@@ -92,55 +127,126 @@ color:#16a34a;
 
 .red {
 
-color:#dc2626;
+  color:#dc2626 !important;
 
 }
 
 
+
+
+
+
+/* =====================
+   SECTION
+===================== */
 
 
 .section {
 
-background:white;
 
-margin-top:30px;
+  background:white;
 
-padding:25px;
 
-border-radius:12px;
+  margin-top:30px;
 
-box-shadow:
-0 4px 12px
-rgba(0,0,0,0.08);
+
+  padding:30px;
+
+
+  border-radius:18px;
+
+
+  box-shadow:
+
+  0 8px 25px
+
+  rgba(15,23,42,0.08);
+
 
 }
 
+
+
+
+.section h2 {
+
+
+  color:#0f172a;
+
+
+  margin-top:0;
+
+
+}
+
+
+
+
+
+/* =====================
+   CHART
+===================== */
 
 
 .chart-box {
 
-height:350px;
+
+  height:380px;
+
+
+  width:100%;
+
 
 }
 
+
+
+
+
+
+
+/* =====================
+   FILTER
+===================== */
+
+
+.filter {
+
+
+  margin-bottom:20px;
+
+}
 
 
 
 button {
 
-padding:10px 20px;
 
-margin-right:10px;
+  padding:
 
-border:none;
+  10px 22px;
 
-border-radius:8px;
 
-background:#2563eb;
+  margin-right:12px;
 
-color:white;
 
-cursor:pointer;
+  border:none;
+
+
+  border-radius:10px;
+
+
+  background:#2563eb;
+
+
+  color:white;
+
+
+  font-size:15px;
+
+
+  cursor:pointer;
+
 
 }
 
@@ -148,36 +254,78 @@ cursor:pointer;
 
 button:hover {
 
-opacity:0.8;
+
+  background:#1d4ed8;
+
 
 }
+
+
+
 
 
 
 
 .search {
 
-margin-top:20px;
 
-width:350px;
+  width:400px;
 
-padding:12px;
 
-border-radius:8px;
+  padding:13px;
 
-border:1px solid #ddd;
+
+  margin-bottom:20px;
+
+
+  border-radius:10px;
+
+
+  border:
+
+  1px solid #cbd5e1;
+
+
+  font-size:15px;
+
 
 }
 
 
 
+
+
+
+
+/* =====================
+   TABLE
+===================== */
+
+
 table {
 
-margin-top:20px;
 
-width:100%;
+  width:100%;
 
-border-collapse:collapse;
+
+  border-collapse:collapse;
+
+
+  margin-top:20px;
+
+
+}
+
+
+
+thead {
+
+
+  position:sticky;
+
+
+  top:0;
+
 
 }
 
@@ -185,41 +333,75 @@ border-collapse:collapse;
 
 th {
 
-background:#111827;
 
-color:white;
+  background:#0f172a;
 
-padding:12px;
+
+  color:white;
+
+
+  padding:14px;
+
+
+  text-align:left;
+
+
+  font-size:14px;
+
 
 }
+
 
 
 
 td {
 
-padding:12px;
 
-border-bottom:1px solid #ddd;
+  padding:14px;
 
-vertical-align:top;
+
+  border-bottom:
+
+  1px solid #e2e8f0;
+
+
+  vertical-align:top;
+
+
+  max-width:300px;
+
 
 }
+
 
 
 
 tr:hover {
 
-background:#f9fafb;
+
+  background:#f8fafc;
+
 
 }
 
 
 
+
+
+
+/* =====================
+   STATUS
+===================== */
+
+
 .status-good {
 
-color:#16a34a;
 
-font-weight:bold;
+  color:#16a34a;
+
+
+  font-weight:bold;
+
 
 }
 
@@ -227,28 +409,171 @@ font-weight:bold;
 
 .status-bad {
 
-color:#dc2626;
 
-font-weight:bold;
+  color:#dc2626;
+
+
+  font-weight:bold;
+
+
+}
+
+
+
+
+
+
+
+/* =====================
+   ERROR BADGE
+===================== */
+
+
+.error-badge {
+
+
+  display:inline-block;
+
+
+  background:#fee2e2;
+
+
+  color:#b91c1c;
+
+
+  padding:
+
+  5px 10px;
+
+
+  border-radius:20px;
+
+
+  margin:
+
+  3px;
+
+
+  font-size:13px;
+
+
+  font-weight:600;
+
 
 }
 
 
-
-.error-item {
-
-color:#dc2626;
-
-margin-bottom:5px;
-
-}
 
 
 
 .success {
 
-color:#16a34a;
 
-font-weight:bold;
+  color:#16a34a;
+
+
+  font-weight:bold;
+
+
+}
+
+
+
+
+
+
+/* =====================
+   LOADING
+===================== */
+
+
+.loading {
+
+
+  text-align:center;
+
+
+  margin-top:100px;
+
+
+  font-size:24px;
+
+
+  color:#475569;
+
+
+}
+
+
+
+
+
+
+
+/* =====================
+   RESPONSIVE
+===================== */
+
+
+@media(max-width:1000px){
+
+
+.cards {
+
+
+grid-template-columns:
+
+repeat(2,1fr);
+
+
+}
+
+
+
+}
+
+
+
+@media(max-width:600px){
+
+
+.dashboard {
+
+
+padding:15px;
+
+
+}
+
+
+.cards {
+
+
+grid-template-columns:
+
+1fr;
+
+
+}
+
+
+.search {
+
+
+width:100%;
+
+
+}
+
+
+
+table {
+
+
+font-size:13px;
+
+
+}
+
 
 }

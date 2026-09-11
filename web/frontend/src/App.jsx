@@ -13,27 +13,32 @@ import {
 import "./App.css";
 
 
+
 function App() {
 
 
-  const [report, setReport] = useState(null);
+  // ==========================
+  // STATE
+  // ==========================
 
-  const [analysis, setAnalysis] = useState([]);
 
-  const [filter, setFilter] = useState("all");
+  const [report,setReport] = useState(null);
 
-  const [search, setSearch] = useState("");
+  const [analysis,setAnalysis] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading,setLoading] = useState(true);
 
-  const [selectedAudio, setSelectedAudio] = useState(null);
+  const [filter,setFilter] = useState("all");
 
+  const [search,setSearch] = useState("");
+
+  const [selectedAudio,setSelectedAudio] = useState(null);
 
 
 
 
   // ==========================
-  // LOAD DATA
+  // LOAD API
   // ==========================
 
 
@@ -41,33 +46,50 @@ function App() {
 
 
     axios
-      .get(
-        "http://127.0.0.1:8000/report"
-      )
-      .then(res=>{
+    .get(
+      "http://127.0.0.1:8000/report"
+    )
+    .then(res=>{
 
-        setReport(res.data);
+      setReport(res.data);
 
-      });
+    })
+    .catch(err=>{
+
+      console.log(err);
+
+    });
+
+
 
 
 
     axios
-      .get(
-        "http://127.0.0.1:8000/analysis"
-      )
-      .then(res=>{
+    .get(
+      "http://127.0.0.1:8000/analysis"
+    )
+    .then(res=>{
 
 
-        setAnalysis(
-          res.data.data || []
-        );
+      setAnalysis(
+        res.data.data || []
+      );
 
 
-        setLoading(false);
+      setLoading(false);
 
 
-      });
+    })
+    .catch(err=>{
+
+
+      console.log(err);
+
+
+      setLoading(false);
+
+
+    });
 
 
 
@@ -78,10 +100,16 @@ function App() {
 
 
 
+  // ==========================
+  // LOADING
+  // ==========================
+
+
   if(
     loading ||
     !report
   ){
+
 
     return (
 
@@ -93,6 +121,7 @@ function App() {
 
     );
 
+
   }
 
 
@@ -102,7 +131,7 @@ function App() {
 
 
   // ==========================
-  // STATISTICS
+  // STATISTIC
   // ==========================
 
 
@@ -115,8 +144,7 @@ function App() {
     analysis.filter(
       item =>
       item.status==="Đúng"
-    )
-    .length;
+    ).length;
 
 
 
@@ -125,37 +153,34 @@ function App() {
     analysis.filter(
       item =>
       item.status==="Sai"
-    )
-    .length;
+    ).length;
 
 
 
 
 
-  const avgWER =
+
+  const werAverage =
+
   (
     report
-    .tong_quan
-    .WER_trung_binh
-    *
-    100
+    ?.tong_quan
+    ?.WER_trung_binh || 0
   )
-  .toFixed(2);
+
+  *100;
 
 
 
+  const cerAverage =
 
-
-  const avgCER =
   (
     report
-    .tong_quan
-    .CER_trung_binh
-    *
-    100
+    ?.tong_quan
+    ?.CER_trung_binh || 0
   )
-  .toFixed(2);
 
+  *100;
 
 
 
@@ -171,7 +196,7 @@ function App() {
   function translateError(error){
 
 
-    const map = {
+    const map={
 
 
       tone_error:
@@ -198,6 +223,7 @@ function App() {
       "Token ngoài tiếng Việt"
 
 
+
     };
 
 
@@ -217,8 +243,7 @@ function App() {
   // ==========================
 
 
-  let tableData =
-    analysis;
+  let tableData=[...analysis];
 
 
 
@@ -226,8 +251,9 @@ function App() {
 
 
     tableData =
+
     tableData.filter(
-      item =>
+      item=>
       item.status==="Sai"
     );
 
@@ -242,8 +268,9 @@ function App() {
 
 
     tableData =
+
     tableData.filter(
-      item =>
+      item=>
       item.status==="Đúng"
     );
 
@@ -255,20 +282,18 @@ function App() {
 
 
 
-
-  if(search.trim()){
+  if(search.trim()!==""){
 
 
     tableData =
-    tableData.filter(item=>
 
+    tableData.filter(item=>
 
       item.ground_truth
       .toLowerCase()
       .includes(
         search.toLowerCase()
       )
-
 
       ||
 
@@ -277,7 +302,6 @@ function App() {
       .includes(
         search.toLowerCase()
       )
-
 
     );
 
@@ -290,14 +314,12 @@ function App() {
 
 
 
-
-
   // ==========================
-  // ERROR CHART
+  // CHART
   // ==========================
 
 
-  const errorMap={};
+  const errorCount={};
 
 
 
@@ -307,15 +329,11 @@ function App() {
     item.errors.forEach(error=>{
 
 
-      errorMap[error]
-      =
+      errorCount[error] =
       (
-        errorMap[error]
-        ||
-        0
+        errorCount[error] || 0
       )
       +1;
-
 
 
     });
@@ -329,23 +347,23 @@ function App() {
   const chartData =
 
   Object
-  .entries(errorMap)
-  .map(
-    ([name,value])=>({
-
-      name:
-      translateError(name),
-
-      value
-
-    })
-  );
+  .entries(errorCount)
+  .map(([name,value])=>({
 
 
+    name:
+    translateError(name),
 
 
+    value
 
 
+  }));
+
+
+  // ==========================
+  // RETURN UI
+  // ==========================
 
 
   return (
@@ -356,8 +374,16 @@ function App() {
 
 
 
+
+{/* ==========================
+HEADER
+========================== */}
+
+
 <h1>
+
 Vietnamese ASR Error Analyzer
+
 </h1>
 
 
@@ -374,7 +400,11 @@ Whisper Vietnamese Speech Recognition Evaluation Dashboard
 
 
 
-{/* ================= CARD ================= */}
+
+
+{/* ==========================
+CARDS
+========================== */}
 
 
 
@@ -384,13 +414,20 @@ Whisper Vietnamese Speech Recognition Evaluation Dashboard
 
 <div className="card">
 
+
 <h3>
+
 Tổng Audio
+
 </h3>
 
+
 <strong>
+
 {totalAudio}
+
 </strong>
+
 
 </div>
 
@@ -398,11 +435,17 @@ Tổng Audio
 
 
 
+
+
 <div className="card">
 
+
 <h3>
+
 Nhận dạng đúng
+
 </h3>
+
 
 <strong className="green">
 
@@ -410,7 +453,10 @@ Nhận dạng đúng
 
 </strong>
 
+
 </div>
+
+
 
 
 
@@ -418,9 +464,13 @@ Nhận dạng đúng
 
 <div className="card">
 
+
 <h3>
+
 Có lỗi
+
 </h3>
+
 
 <strong className="red">
 
@@ -428,7 +478,10 @@ Có lỗi
 
 </strong>
 
+
 </div>
+
+
 
 
 
@@ -436,19 +489,26 @@ Có lỗi
 
 <div className="card">
 
+
 <h3>
+
 WER / CER
+
 </h3>
+
 
 <strong>
 
-{avgWER}% / {avgCER}%
+
+{werAverage.toFixed(2)}%
+
+/
+
+{cerAverage.toFixed(2)}%
+
 
 </strong>
 
-</div>
-
-
 
 </div>
 
@@ -457,10 +517,19 @@ WER / CER
 
 
 
+</div>
 
 
 
-{/* ================= CHART ================= */}
+
+
+
+
+
+
+{/* ==========================
+CHART
+========================== */}
 
 
 
@@ -468,61 +537,89 @@ WER / CER
 
 
 <h2>
+
 Phân bố lỗi tiếng Việt
+
 </h2>
+
+
 
 
 
 <div className="chart-box">
 
 
+
 <ResponsiveContainer
+
 width="100%"
+
 height="100%"
+
 >
+
 
 
 <BarChart
+
 data={chartData}
+
 >
 
 
+
 <XAxis
+
 dataKey="name"
+
 />
 
 
-<YAxis/>
+
+<YAxis />
 
 
-<Tooltip/>
+
+<Tooltip />
+
 
 
 <Bar
+
 dataKey="value"
+
+fill="#2563eb"
+
 />
+
 
 
 </BarChart>
 
 
+
 </ResponsiveContainer>
 
 
-</div>
 
 
 </div>
 
 
 
+</div>
 
 
 
 
 
 
-{/* ================= TABLE ================= */}
+
+
+
+{/* ==========================
+TABLE
+========================== */}
 
 
 
@@ -530,8 +627,13 @@ dataKey="value"
 
 
 <h2>
+
 Phân tích từng Audio
+
 </h2>
+
+
+
 
 
 
@@ -539,31 +641,49 @@ Phân tích từng Audio
 <div className="filter">
 
 
+
 <button
+
 onClick={()=>setFilter("all")}
+
 >
+
 Tất cả
+
 </button>
 
 
 
+
+
 <button
+
 onClick={()=>setFilter("wrong")}
+
 >
+
 Chỉ lỗi
+
 </button>
 
 
 
+
+
 <button
+
 onClick={()=>setFilter("correct")}
+
 >
+
 Chính xác
+
 </button>
 
 
 
 </div>
+
 
 
 
@@ -572,17 +692,28 @@ Chính xác
 
 <input
 
+
 className="search"
 
-placeholder="Tìm kiếm câu..."
+
+placeholder="Tìm kiếm câu nhận dạng..."
+
 
 value={search}
 
+
 onChange={
-e=>setSearch(e.target.value)
+
+e=>
+
+setSearch(e.target.value)
+
 }
 
+
 />
+
+
 
 
 
@@ -595,41 +726,62 @@ e=>setSearch(e.target.value)
 
 <thead>
 
+
 <tr>
 
 
 <th>
+
 Audio
+
 </th>
 
 
+
 <th>
+
 Câu chuẩn
+
 </th>
 
 
+
 <th>
+
 Whisper
+
 </th>
 
 
+
 <th>
+
 WER
+
 </th>
 
 
+
 <th>
+
 CER
+
 </th>
 
 
+
 <th>
+
 Trạng thái
+
 </th>
 
 
+
 <th>
+
 Lỗi
+
 </th>
 
 
@@ -643,67 +795,98 @@ Lỗi
 
 
 
+
+
 <tbody>
+
 
 
 {
 
 tableData.map(
+
 (item,index)=>(
 
 
 <tr
 
+
 key={index}
+
 
 className="click-row"
 
-onClick={()=>
-setSelectedAudio(item)
-}
+
+onClick={()=>setSelectedAudio(item)}
+
 
 >
 
 
 
 <td>
+
 {item.audio}
+
 </td>
 
 
 
+
+
 <td>
+
 {item.ground_truth}
+
 </td>
 
 
 
+
+
 <td>
+
 {item.prediction}
+
 </td>
+
+
 
 
 
 
 <td>
 
+
 {
+
 (item.wer*100)
+
 .toFixed(2)
+
 }%
 
 </td>
+
+
+
 
 
 
 <td>
 
+
 {
+
 (item.cer*100)
+
 .toFixed(2)
+
 }%
 
 </td>
+
+
 
 
 
@@ -713,23 +896,37 @@ setSelectedAudio(item)
 
 <span
 
+
 className={
+
 item.status==="Đúng"
+
 ?
+
 "status-good"
+
 :
+
 "status-bad"
+
 }
+
 
 >
 
 
 {
+
 item.status==="Đúng"
+
 ?
+
 "✓ Đúng"
+
 :
+
 "✗ Sai"
+
 }
 
 
@@ -741,14 +938,21 @@ item.status==="Đúng"
 
 
 
+
+
+
 <td>
+
 
 
 {
 
+
 item.errors.length===0
 
+
 ?
+
 
 <span className="success">
 
@@ -757,14 +961,16 @@ Không lỗi
 </span>
 
 
+
 :
 
 
 item.errors.map(
+
 (error,i)=>(
 
 
-<span
+<div
 
 key={i}
 
@@ -774,20 +980,24 @@ className="error-badge"
 
 {translateError(error)}
 
-</span>
+</div>
 
 
 )
 
 
 )
+
 
 
 }
 
 
 
+
+
 </td>
+
 
 
 
@@ -798,13 +1008,23 @@ className="error-badge"
 
 )
 
+
+)
+
+
 }
+
+
 
 
 </tbody>
 
 
+
+
 </table>
+
+
 
 
 
@@ -815,16 +1035,14 @@ className="error-badge"
 
 
 
-
-
-
-{/* ================= MODAL ================= */}
-
+// ==========================
+// MODAL DETAIL
+// ==========================
 
 
 {
 
-selectedAudio &&
+selectedAudio && (
 
 
 <div className="modal-overlay">
@@ -835,42 +1053,69 @@ selectedAudio &&
 
 
 
+
+
 <button
+
 
 className="close-btn"
 
-onClick={()=>
-setSelectedAudio(null)
-}
+
+onClick={()=>setSelectedAudio(null)}
+
 
 >
+
 ×
+
 </button>
 
 
 
+
+
+
+
 <h2>
-Chi tiết phân tích
+
+Chi tiết phân tích Audio
+
 </h2>
 
 
 
+
+
+
+
 <h3>
-Audio
+
+Tên file
+
 </h3>
 
+
 <p>
+
 {selectedAudio.audio}
+
 </p>
 
 
 
 
+
+
+
+
 <h3>
+
 Câu chuẩn
+
 </h3>
 
-<p>
+
+<p className="text-box">
 
 {selectedAudio.ground_truth}
 
@@ -879,11 +1124,18 @@ Câu chuẩn
 
 
 
+
+
+
+
 <h3>
+
 Whisper nhận dạng
+
 </h3>
 
-<p>
+
+<p className="text-box">
 
 {selectedAudio.prediction}
 
@@ -894,36 +1146,62 @@ Whisper nhận dạng
 
 
 
+
+
+
 <div className="score-box">
 
 
+
 <div>
+
+
+<h4>
 
 WER
 
+</h4>
+
+
 <strong>
 
 {
+
 (selectedAudio.wer*100)
+
 .toFixed(2)
+
 }%
 
 </strong>
 
+
 </div>
+
+
+
 
 
 
 
 <div>
 
+
+<h4>
+
 CER
+
+</h4>
+
 
 <strong>
 
 {
+
 (selectedAudio.cer*100)
+
 .toFixed(2)
+
 }%
 
 </strong>
@@ -932,26 +1210,36 @@ CER
 </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
 
 
 <h3>
-Phân tích lỗi
+
+Phân loại lỗi
+
 </h3>
 
 
 
-<div>
 
 
 {
 
+
 selectedAudio.errors.length===0
 
+
 ?
+
 
 <span className="success">
 
@@ -960,9 +1248,12 @@ Không có lỗi
 </span>
 
 
+
 :
 
+
 selectedAudio.errors.map(
+
 (error,index)=>(
 
 
@@ -981,31 +1272,76 @@ className="error-badge"
 
 )
 
+)
+
+
+
+}
+
+
+
+
+
+
+
+
+<div className="analysis-status">
+
+
+{
+
+
+selectedAudio.status==="Đúng"
+
+
+?
+
+
+"✓ Nhận dạng chính xác"
+
+
+:
+
+
+"✗ Cần cải thiện"
+
+
+
+}
+
+
+
+</div>
+
+
+
+
+
+
+
+
+</div>
+
+
+
+</div>
+
+
 
 )
 
 
-}
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-</div>
-
-
 
 }
 
 
 
+
+
+
+
 </div>
+
 
 
   );

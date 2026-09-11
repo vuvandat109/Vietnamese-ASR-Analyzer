@@ -1,15 +1,29 @@
+# =====================================================
+# audio_analyzer.py
+# Vietnamese ASR Error Analyzer V9.1
+# =====================================================
+
+
 import jiwer
+
 
 from vietnamese_phoneme import analyze_word
 
 
 
-# =====================================
+
+
+
+
+# =====================================================
 # TÍNH WER / CER
-# =====================================
+# =====================================================
 
 
-def calculate_score(reference, prediction):
+def calculate_score(
+        reference,
+        prediction
+):
 
 
     wer = jiwer.wer(
@@ -26,12 +40,23 @@ def calculate_score(reference, prediction):
 
     return {
 
+
         "wer":
-        round(wer,4),
+
+        round(
+            wer,
+            4
+        ),
+
 
 
         "cer":
-        round(cer,4)
+
+        round(
+            cer,
+            4
+        )
+
 
     }
 
@@ -40,34 +65,152 @@ def calculate_score(reference, prediction):
 
 
 
-# =====================================
-# PHÂN TÍCH LỖI CƠ BẢN
-# =====================================
+
+# =====================================================
+# PHÂN LOẠI LỖI
+# =====================================================
 
 
-def simple_error_check(reference, prediction):
+def detect_word_error(
+        reference,
+        prediction
+):
+
+
+    detail = analyze_word(
+
+        reference,
+
+        prediction
+
+    )
+
 
 
     errors = []
 
 
+
+
+    # âm đầu
+
+
+    if not detail["initial"]["correct"]:
+
+
+        errors.append(
+
+            "initial_consonant_error"
+
+        )
+
+
+
+
+
+    # âm chính
+
+
+    if not detail["nucleus"]["correct"]:
+
+
+        errors.append(
+
+            "nucleus_error"
+
+        )
+
+
+
+
+
+    # âm cuối
+
+
+    if not detail["final"]["correct"]:
+
+
+        errors.append(
+
+            "final_consonant_error"
+
+        )
+
+
+
+
+
+    # thanh điệu
+
+
+    if not detail["tone"]["correct"]:
+
+
+        errors.append(
+
+            "tone_error"
+
+        )
+
+
+
+
+
+    return errors, detail
+
+
+
+
+
+
+
+# =====================================================
+# KIỂM TRA LỖI CÂU
+# =====================================================
+
+
+def simple_error_check(
+        reference,
+        prediction
+):
+
+
+    errors = []
+
+
+
     if reference.strip() == prediction.strip():
 
+
         return errors
+
+
+
 
 
 
     ref_words = reference.split()
 
+
     hyp_words = prediction.split()
 
 
 
+
+
+
+    # khác số lượng từ
+
+
     if len(ref_words) != len(hyp_words):
 
+
         errors.append(
+
             "multi_component_error"
+
         )
+
 
         return errors
 
@@ -75,74 +218,56 @@ def simple_error_check(reference, prediction):
 
 
 
-    for r, h in zip(
+
+
+
+    for r,h in zip(
         ref_words,
         hyp_words
     ):
 
 
+
         if r != h:
 
 
-            try:
+            word_errors, _ = detect_word_error(
 
-                detail = analyze_word(
-                    r,
-                    h
-                )
+                r,
 
+                h
 
-
-                if not detail["initial"]["correct"]:
-
-                    errors.append(
-                        "initial_consonant_error"
-                    )
+            )
 
 
+            errors.extend(
 
-                if not detail["nucleus"]["correct"]:
+                word_errors
 
-                    errors.append(
-                        "nucleus_error"
-                    )
-
-
-
-                if not detail["final"]["correct"]:
-
-                    errors.append(
-                        "final_consonant_error"
-                    )
-
-
-
-                if not detail["tone"]["correct"]:
-
-                    errors.append(
-                        "tone_error"
-                    )
-
-
-
-            except Exception:
-
-
-                errors.append(
-                    "word_error"
-                )
-
-
-
-    return list(set(errors))
+            )
 
 
 
 
 
-# =====================================
-# PHÂN TÍCH TỪ SAI CHI TIẾT
-# =====================================
+
+
+    return list(
+
+        set(errors)
+
+    )
+
+
+
+
+
+
+
+
+# =====================================================
+# PHÂN TÍCH CHI TIẾT TỪNG TỪ
+# =====================================================
 
 
 def analyze_sentence_phoneme(
@@ -158,14 +283,19 @@ def analyze_sentence_phoneme(
 
 
 
-    result=[]
+    result = []
 
 
 
-    max_len=max(
+
+    max_len = max(
+
         len(ref_words),
+
         len(hyp_words)
+
     )
+
 
 
 
@@ -199,7 +329,7 @@ def analyze_sentence_phoneme(
 
 
 
-        # chỉ phân tích từ sai
+
 
         if ref != hyp and ref and hyp:
 
@@ -209,25 +339,37 @@ def analyze_sentence_phoneme(
 
 
                 detail = analyze_word(
+
                     ref,
+
                     hyp
+
                 )
+
 
 
             except Exception as e:
 
 
-                detail={
+
+                detail = {
+
 
                     "error":
+
                     str(e)
+
 
                 }
 
 
 
 
+
+
             result.append({
+
+
 
                 "reference":
 
@@ -246,7 +388,10 @@ def analyze_sentence_phoneme(
                 detail
 
 
+
             })
+
+
 
 
 
@@ -259,9 +404,12 @@ def analyze_sentence_phoneme(
 
 
 
-# =====================================
-# PHÂN TÍCH TOÀN BỘ AUDIO
-# =====================================
+
+
+
+# =====================================================
+# PHÂN TÍCH 1 AUDIO
+# =====================================================
 
 
 def analyze_result(
@@ -271,30 +419,48 @@ def analyze_result(
 ):
 
 
+
     score = calculate_score(
+
         reference,
+
         prediction
+
     )
+
+
 
 
 
     errors = simple_error_check(
+
         reference,
+
         prediction
+
     )
+
+
 
 
 
 
     word_analysis = analyze_sentence_phoneme(
+
         reference,
+
         prediction
+
     )
 
 
 
 
+
+
+
     return {
+
 
 
         "audio":
@@ -327,15 +493,22 @@ def analyze_result(
 
 
 
+
+
         "status":
 
-        "Đúng"
+        (
 
-        if len(errors)==0
+            "Đúng"
 
-        else
+            if len(errors)==0
 
-        "Sai",
+            else
+
+            "Sai"
+
+        ),
+
 
 
 
@@ -343,6 +516,7 @@ def analyze_result(
         "errors":
 
         errors,
+
 
 
 

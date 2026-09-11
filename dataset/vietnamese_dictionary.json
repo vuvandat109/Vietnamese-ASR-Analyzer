@@ -1,0 +1,43 @@
+{
+    "chạy": {
+        "initial": "ch",
+        "nucleus": "ay",
+        "final": "",
+        "tone": "nặng"
+    },
+
+    "chảy": {
+        "initial": "ch",
+        "nucleus": "ay",
+        "final": "",
+        "tone": "hỏi"
+    },
+
+    "không": {
+        "initial": "kh",
+        "nucleus": "ô",
+        "final": "ng",
+        "tone": "ngang"
+    },
+
+    "khủng": {
+        "initial": "kh",
+        "nucleus": "u",
+        "final": "ng",
+        "tone": "hỏi"
+    },
+
+    "khác": {
+        "initial": "kh",
+        "nucleus": "a",
+        "final": "c",
+        "tone": "sắc"
+    },
+
+    "tạo": {
+        "initial": "t",
+        "nucleus": "ao",
+        "final": "",
+        "tone": "nặng"
+    }
+}

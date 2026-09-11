@@ -1,100 +1,130 @@
-# ==========================================
+# =====================================================
 # vietnamese_phoneme.py
-# Vietnamese syllable analyzer V8.2
-# ==========================================
+# Vietnamese ASR Phoneme Analyzer V9.2
+# Dictionary First + Unicode Normalization
+# =====================================================
+
+
+import unicodedata
+
+from vietnamese_dictionary import lookup_word
 
 
 
-# ==========================================
-# THANH ĐIỆU
-# ==========================================
+
+
+# =====================================================
+# NORMALIZE UNICODE
+# =====================================================
+
+
+def normalize_text(text):
+
+
+    return unicodedata.normalize(
+        "NFC",
+        str(text)
+        .lower()
+        .strip()
+    )
+
+
+
+
+
+
+
+
+# =====================================================
+# TONE MAP
+# =====================================================
 
 
 TONE_MAP = {
 
 
-    "á":"sắc",
-    "à":"huyền",
-    "ả":"hỏi",
-    "ã":"ngã",
-    "ạ":"nặng",
+    "�":"s?c",
+    "�":"huy?n",
+    "?":"h?i",
+    "�":"ng�",
+    "?":"n?ng",
 
 
-    "ắ":"sắc",
-    "ằ":"huyền",
-    "ẳ":"hỏi",
-    "ẵ":"ngã",
-    "ặ":"nặng",
+    "?":"s?c",
+    "?":"huy?n",
+    "?":"h?i",
+    "?":"ng�",
+    "?":"n?ng",
 
 
-    "ấ":"sắc",
-    "ầ":"huyền",
-    "ẩ":"hỏi",
-    "ẫ":"ngã",
-    "ậ":"nặng",
+    "?":"s?c",
+    "?":"huy?n",
+    "?":"h?i",
+    "?":"ng�",
+    "?":"n?ng",
 
 
-    "é":"sắc",
-    "è":"huyền",
-    "ẻ":"hỏi",
-    "ẽ":"ngã",
-    "ẹ":"nặng",
+    "�":"s?c",
+    "�":"huy?n",
+    "?":"h?i",
+    "?":"ng�",
+    "?":"n?ng",
 
 
-    "ế":"sắc",
-    "ề":"huyền",
-    "ể":"hỏi",
-    "ễ":"ngã",
-    "ệ":"nặng",
+    "?":"s?c",
+    "?":"huy?n",
+    "?":"h?i",
+    "?":"ng�",
+    "?":"n?ng",
 
 
-    "í":"sắc",
-    "ì":"huyền",
-    "ỉ":"hỏi",
-    "ĩ":"ngã",
-    "ị":"nặng",
+    "�":"s?c",
+    "�":"huy?n",
+    "?":"h?i",
+    "i":"ng�",
+    "?":"n?ng",
 
 
-    "ó":"sắc",
-    "ò":"huyền",
-    "ỏ":"hỏi",
-    "õ":"ngã",
-    "ọ":"nặng",
+    "�":"s?c",
+    "�":"huy?n",
+    "?":"h?i",
+    "�":"ng�",
+    "?":"n?ng",
 
 
-    "ố":"sắc",
-    "ồ":"huyền",
-    "ổ":"hỏi",
-    "ỗ":"ngã",
-    "ộ":"nặng",
+    "?":"s?c",
+    "?":"huy?n",
+    "?":"h?i",
+    "?":"ng�",
+    "?":"n?ng",
 
 
-    "ớ":"sắc",
-    "ờ":"huyền",
-    "ở":"hỏi",
-    "ỡ":"ngã",
-    "ợ":"nặng",
+    "?":"s?c",
+    "?":"huy?n",
+    "?":"h?i",
+    "?":"ng�",
+    "?":"n?ng",
 
 
-    "ú":"sắc",
-    "ù":"huyền",
-    "ủ":"hỏi",
-    "ũ":"ngã",
-    "ụ":"nặng",
+    "�":"s?c",
+    "�":"huy?n",
+    "?":"h?i",
+    "u":"ng�",
+    "?":"n?ng",
 
 
-    "ứ":"sắc",
-    "ừ":"huyền",
-    "ử":"hỏi",
-    "ữ":"ngã",
-    "ự":"nặng",
+    "?":"s?c",
+    "?":"huy?n",
+    "?":"h?i",
+    "?":"ng�",
+    "?":"n?ng",
 
 
-    "ý":"sắc",
-    "ỳ":"huyền",
-    "ỷ":"hỏi",
-    "ỹ":"ngã",
-    "ỵ":"nặng"
+    "�":"s?c",
+    "?":"huy?n",
+    "?":"h?i",
+    "?":"ng�",
+    "?":"n?ng"
 
 }
 
@@ -102,15 +132,21 @@ TONE_MAP = {
 
 
 
-# ==========================================
-# LẤY THANH ĐIỆU
-# ==========================================
+
+
+
+# =====================================================
+# GET TONE
+# =====================================================
 
 
 def get_tone(word):
 
 
-    for c in word.lower():
+    word = normalize_text(word)
+
+
+    for c in word:
 
 
         if c in TONE_MAP:
@@ -127,49 +163,54 @@ def get_tone(word):
 
 
 
-# ==========================================
-# BỎ DẤU NHƯNG GIỮ ÂM ĐẶC BIỆT
-# ==========================================
+
+# =====================================================
+# REMOVE TONE
+# =====================================================
 
 
 def remove_tone(word):
 
 
+    word = normalize_text(word)
+
+
+
     table = str.maketrans(
 
 
-        "áàảãạ"
-        "ắằẳẵặ"
-        "ấầẩẫậ"
-        "éèẻẽẹ"
-        "ếềểễệ"
-        "íìỉĩị"
-        "óòỏõọ"
-        "ốồổỗộ"
-        "ớờởỡợ"
-        "úùủũụ"
-        "ứừửữự"
-        "ýỳỷỹỵ",
+        "��?�?"
+        "?????"
+        "?????"
+        "��???"
+        "?????"
+        "��?i?"
+        "��?�?"
+        "?????"
+        "?????"
+        "��?u?"
+        "?????"
+        "�????",
 
 
 
         "aaaaa"
-        "ăăăăă"
-        "âââââ"
+        "aaaaa"
+        "�����"
         "eeeee"
-        "êêêêê"
+        "�����"
         "iiiii"
         "ooooo"
-        "ôôôôô"
-        "ơơơơơ"
+        "�����"
+        "ooooo"
         "uuuuu"
-        "ưưưưư"
+        "uuuuu"
         "yyyyy"
 
     )
 
 
-    return word.lower().translate(table)
+    return word.translate(table)
 
 
 
@@ -177,66 +218,45 @@ def remove_tone(word):
 
 
 
-# ==========================================
-# PHỤ ÂM ĐẦU
-# ==========================================
+
+
+
+# =====================================================
+# RULE FALLBACK
+# =====================================================
 
 
 INITIALS = [
 
+
     "ngh",
-
     "ch",
-
     "gh",
-
     "nh",
-
     "th",
-
     "tr",
-
     "ph",
-
     "kh",
-
     "qu",
-
     "gi",
-
     "ng",
-
-
-    "đ",
-
-    "b",
-
-    "c",
 
     "d",
 
+    "b",
+    "c",
+    "d",
     "g",
-
     "h",
-
     "k",
-
     "l",
-
     "m",
-
     "n",
-
     "p",
-
     "r",
-
     "s",
-
     "t",
-
     "v",
-
     "x"
 
 ]
@@ -244,30 +264,15 @@ INITIALS = [
 
 
 
-
-
-
-# ==========================================
-# ÂM CUỐI
-# ==========================================
-
-
 FINALS = [
 
     "ng",
-
     "nh",
-
     "ch",
-
     "m",
-
     "n",
-
     "p",
-
     "t",
-
     "c"
 
 ]
@@ -278,65 +283,6 @@ FINALS = [
 
 
 
-
-# ==========================================
-# NGUYÊN ÂM ĐÔI
-# ==========================================
-
-
-VOWELS = [
-
-    "iê",
-
-    "yê",
-
-    "uô",
-
-    "ươ",
-
-    "oa",
-
-    "oe",
-
-    "uy",
-
-    "ua",
-
-    "ia",
-
-    "ay",
-
-    "ai",
-
-    "ao",
-
-    "au",
-
-    "âu",
-
-    "ôi",
-
-    "ơi",
-
-    "ui",
-
-    "eo",
-
-    "êu"
-
-
-]
-
-
-
-
-
-
-
-
-# ==========================================
-# TÁCH ÂM TIẾT
-# ==========================================
 
 
 def split_syllable(word):
@@ -350,19 +296,12 @@ def split_syllable(word):
 
 
         "initial":"",
-
         "nucleus":"",
-
-        "final":""
-
+        "final":"",
+        "tone":get_tone(word)
 
     }
 
-
-
-    # ------------------
-    # phụ âm đầu
-    # ------------------
 
 
     for i in INITIALS:
@@ -383,12 +322,6 @@ def split_syllable(word):
 
 
 
-
-    # ------------------
-    # âm cuối
-    # ------------------
-
-
     for f in FINALS:
 
 
@@ -407,12 +340,6 @@ def split_syllable(word):
 
 
 
-
-    # ------------------
-    # âm chính
-    # ------------------
-
-
     result["nucleus"] = clean
 
 
@@ -425,23 +352,94 @@ def split_syllable(word):
 
 
 
-# ==========================================
-# SO SÁNH HAI TỪ
-# ==========================================
+
+
+# =====================================================
+# DICTIONARY FIRST
+# =====================================================
+
+
+def get_word_phoneme(word):
+
+
+    word = normalize_text(word)
+
+
+
+    data = lookup_word(word)
+
+
+
+    if data is not None:
+
+
+        return {
+
+
+            "initial":
+            normalize_text(
+                data["initial"]
+            ),
+
+
+
+            "nucleus":
+            normalize_text(
+                data["nucleus"]
+            ),
+
+
+
+            "final":
+            normalize_text(
+                data["final"]
+            ),
+
+
+
+            "tone":
+            data["tone"]
+
+        }
+
+
+
+
+    return split_syllable(word)
+
+
+
+
+
+
+
+
+
+# =====================================================
+# ANALYZE WORD
+# =====================================================
 
 
 def analyze_word(reference, prediction):
 
 
-    ref = split_syllable(reference)
+    reference = normalize_text(reference)
+
+    prediction = normalize_text(prediction)
 
 
-    hyp = split_syllable(prediction)
+
+    ref = get_word_phoneme(reference)
+
+
+    hyp = get_word_phoneme(prediction)
+
 
 
 
 
     return {
+
 
 
         "word":
@@ -477,7 +475,6 @@ def analyze_word(reference, prediction):
 
             hyp["initial"]
 
-
         },
 
 
@@ -502,7 +499,6 @@ def analyze_word(reference, prediction):
             ==
 
             hyp["nucleus"]
-
 
         },
 
@@ -529,7 +525,6 @@ def analyze_word(reference, prediction):
 
             hyp["final"]
 
-
         },
 
 
@@ -539,27 +534,23 @@ def analyze_word(reference, prediction):
 
             "reference":
 
-            get_tone(reference),
-
+            ref["tone"],
 
 
             "prediction":
 
-            get_tone(prediction),
-
+            hyp["tone"],
 
 
             "correct":
 
-            get_tone(reference)
+            ref["tone"]
 
             ==
 
-            get_tone(prediction)
-
+            hyp["tone"]
 
         }
-
 
 
     }

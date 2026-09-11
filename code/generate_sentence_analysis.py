@@ -1,40 +1,49 @@
+# -*- coding: utf-8 -*-
+
+# =====================================================
+# generate_sentence_analysis.py
+# Vietnamese ASR Sentence Analysis V10.5
+# Normalize + Alignment + Phoneme Error
+# =====================================================
+
+
 import pandas as pd
 import json
 import sys
+import re
+import unicodedata
 
 
 
-# =====================================
-# IMPORT BACKEND MODULE
-# =====================================
+
+# =====================================================
+# IMPORT BACKEND
+# =====================================================
+
 
 sys.path.append(
     r"E:\ASR_Project\web\backend"
 )
 
 
-from audio_analyzer import analyze_sentence_phoneme
+from audio_analyzer import (
+    analyze_sentence_phoneme
+)
 
 
 
 
 
-# =====================================
+
+
+# =====================================================
 # FILE PATH
-# =====================================
+# =====================================================
 
 
 ASR_FILE = (
 
     r"E:\ASR_Project\dataset\asr_results.csv"
-
-)
-
-
-
-ERROR_FILE = (
-
-    r"E:\ASR_Project\dataset\vietnamese_error_analysis.csv"
 
 )
 
@@ -52,12 +61,72 @@ OUTPUT_FILE = (
 
 
 
-# =====================================
+# =====================================================
+# TEXT NORMALIZATION
+# =====================================================
+
+
+def normalize_text(text):
+
+
+    text = unicodedata.normalize(
+
+        "NFC",
+
+        str(text)
+
+    )
+
+
+    text = text.lower()
+
+
+
+    # bỏ dấu câu
+
+    text = re.sub(
+
+        r"[^\w\sà-ỹđ]",
+
+        "",
+
+        text
+
+    )
+
+
+
+    # bỏ khoảng trắng thừa
+
+    text = re.sub(
+
+        r"\s+",
+
+        " ",
+
+        text
+
+    )
+
+
+
+    return text.strip()
+
+
+
+
+
+
+
+# =====================================================
 # LOAD DATA
-# =====================================
+# =====================================================
 
 
-print("Loading dataset...")
+print(
+    "Loading dataset..."
+)
+
 
 
 
@@ -68,18 +137,6 @@ df_asr = pd.read_csv(
     encoding="utf-8-sig"
 
 )
-
-
-
-df_error = pd.read_csv(
-
-    ERROR_FILE,
-
-    encoding="utf-8-sig"
-
-)
-
-
 
 
 
@@ -97,40 +154,9 @@ print(
 
 
 
-# =====================================
-# ERROR MAP
-# =====================================
-
-
-error_map = {}
-
-
-
-
-for audio, group in df_error.groupby("audio"):
-
-
-    error_map[audio] = (
-
-        group["error_type"]
-
-        .dropna()
-
-        .unique()
-
-        .tolist()
-
-    )
-
-
-
-
-
-
-
-# =====================================
+# =====================================================
 # CREATE ANALYSIS
-# =====================================
+# =====================================================
 
 
 result = []
@@ -147,27 +173,96 @@ for index,row in df_asr.iterrows():
 
 
 
-    reference = str(
+
+    reference = normalize_text(
+
         row["ground_truth"]
-    ).strip()
-
-
-
-    prediction = str(
-        row["prediction"]
-    ).strip()
-
-
-
-
-
-    errors = error_map.get(
-
-        audio,
-
-        []
 
     )
+
+
+
+    prediction = normalize_text(
+
+        row["prediction"]
+
+    )
+
+
+
+
+
+
+    # =====================================
+    # PHONEME ANALYSIS
+    # =====================================
+
+
+
+    try:
+
+
+        word_analysis = analyze_sentence_phoneme(
+
+            reference,
+
+            prediction
+
+        )
+
+
+
+    except Exception as e:
+
+
+        print(
+
+            "Analysis error:",
+
+            audio,
+
+            e
+
+        )
+
+
+        word_analysis = []
+
+
+
+
+
+
+    # =====================================
+    # COLLECT ERROR
+    # =====================================
+
+
+
+    errors = []
+
+
+
+    for item in word_analysis:
+
+
+        for err in item.get(
+
+            "errors",
+
+            []
+
+        ):
+
+
+            errors.append(err)
+
+
+
+
+
+    errors = list(set(errors))
+
 
 
 
@@ -189,57 +284,6 @@ for index,row in df_asr.iterrows():
 
 
 
-    # ==============================
-    # PHONEME ANALYSIS
-    # ==============================
-
-
-    if status == "Sai":
-
-
-        try:
-
-
-            word_analysis = (
-
-                analyze_sentence_phoneme(
-
-                    reference,
-
-                    prediction
-
-                )
-
-            )
-
-
-        except Exception as e:
-
-
-            print(
-
-                "Phoneme error:",
-
-                audio,
-
-                e
-
-            )
-
-
-            word_analysis = []
-
-
-
-    else:
-
-
-        word_analysis = []
-
-
-
-
-
 
 
 
@@ -253,9 +297,11 @@ for index,row in df_asr.iterrows():
 
 
 
+
         "ground_truth":
 
         reference,
+
 
 
 
@@ -265,15 +311,26 @@ for index,row in df_asr.iterrows():
 
 
 
+
         "wer":
 
-        float(row["wer"]),
+        float(
+
+            row["wer"]
+
+        ),
+
 
 
 
         "cer":
 
-        float(row["cer"]),
+        float(
+
+            row["cer"]
+
+        ),
+
 
 
 
@@ -283,9 +340,11 @@ for index,row in df_asr.iterrows():
 
 
 
+
         "errors":
 
         errors,
+
 
 
 
@@ -306,9 +365,11 @@ for index,row in df_asr.iterrows():
 
 
 
-# =====================================
-# OUTPUT JSON
-# =====================================
+
+# =====================================================
+# SAVE JSON
+# =====================================================
+
 
 
 output = {

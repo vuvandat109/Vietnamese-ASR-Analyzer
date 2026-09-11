@@ -8,11 +8,7 @@ import os
 # =====================================
 
 
-DICT_FILE = (
-
-    r"E:\ASR_Project\dataset\vietnamese_dictionary.json"
-
-)
+DICT_FILE = r"E:\ASR_Project\dataset\vietnamese_dictionary_clean.json"
 
 
 
@@ -54,12 +50,14 @@ def load_dictionary():
 
 
 
+
 # =====================================
 # GLOBAL DATA
 # =====================================
 
 
 VIETNAMESE_DICT = load_dictionary()
+
 
 
 
@@ -79,6 +77,9 @@ def lookup_word(word):
 
 
     return VIETNAMESE_DICT.get(
+
         word,
+
         None
+
     )

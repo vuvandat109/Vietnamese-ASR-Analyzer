@@ -1,9 +1,14 @@
+# -*- coding: utf-8 -*-
+
 # =====================================================
 # audio_analyzer.py
-# Vietnamese ASR Error Analyzer V9.1
+# Vietnamese ASR Error Analyzer V10.4
+# Levenshtein Alignment + Phoneme Analysis
 # =====================================================
 
 
+import re
+import unicodedata
 import jiwer
 
 
@@ -12,11 +17,61 @@ from vietnamese_phoneme import analyze_word
 
 
 
+# =====================================================
+# NORMALIZATION
+# =====================================================
+
+
+def normalize_word(word):
+
+    word = unicodedata.normalize(
+        "NFC",
+        str(word)
+    )
+
+
+    word = word.lower()
+
+
+
+    word = re.sub(
+        r"[^\wà-ỹđ]",
+        "",
+        word
+    )
+
+
+    return word
+
+
+
+
+
+def normalize_sentence(text):
+
+    result = []
+
+
+    for word in text.split():
+
+        clean = normalize_word(word)
+
+        if clean:
+
+            result.append(clean)
+
+
+
+    return " ".join(result)
+
+
+
+
 
 
 
 # =====================================================
-# TÍNH WER / CER
+# WER / CER
 # =====================================================
 
 
@@ -26,16 +81,28 @@ def calculate_score(
 ):
 
 
-    wer = jiwer.wer(
-        reference,
+    ref = normalize_sentence(
+        reference
+    )
+
+
+    hyp = normalize_sentence(
         prediction
+    )
+
+
+
+    wer = jiwer.wer(
+        ref,
+        hyp
     )
 
 
     cer = jiwer.cer(
-        reference,
-        prediction
+        ref,
+        hyp
     )
+
 
 
     return {
@@ -57,7 +124,6 @@ def calculate_score(
             4
         )
 
-
     }
 
 
@@ -67,7 +133,7 @@ def calculate_score(
 
 
 # =====================================================
-# PHÂN LOẠI LỖI
+# WORD PHONEME ERROR
 # =====================================================
 
 
@@ -78,81 +144,44 @@ def detect_word_error(
 
 
     detail = analyze_word(
-
         reference,
-
         prediction
-
     )
-
 
 
     errors = []
 
 
 
-
-    # âm đầu
-
-
     if not detail["initial"]["correct"]:
 
-
         errors.append(
-
             "initial_consonant_error"
-
         )
 
-
-
-
-
-    # âm chính
 
 
     if not detail["nucleus"]["correct"]:
 
-
         errors.append(
-
             "nucleus_error"
-
         )
 
-
-
-
-
-    # âm cuối
 
 
     if not detail["final"]["correct"]:
 
-
         errors.append(
-
             "final_consonant_error"
-
         )
 
-
-
-
-
-    # thanh điệu
 
 
     if not detail["tone"]["correct"]:
 
-
         errors.append(
-
             "tone_error"
-
         )
-
-
 
 
 
@@ -165,84 +194,95 @@ def detect_word_error(
 
 
 # =====================================================
-# KIỂM TRA LỖI CÂU
+# LEVENSHTEIN WORD ALIGNMENT
 # =====================================================
 
 
-def simple_error_check(
+def word_alignment(
         reference,
         prediction
 ):
 
 
-    errors = []
+    ref_words = [
+
+        normalize_word(w)
+
+        for w in reference.split()
+
+    ]
 
 
 
-    if reference.strip() == prediction.strip():
+    hyp_words = [
 
+        normalize_word(w)
 
-        return errors
+        for w in prediction.split()
 
-
-
-
-
-
-    ref_words = reference.split()
-
-
-    hyp_words = prediction.split()
+    ]
 
 
 
+    m = len(ref_words)
+
+    n = len(hyp_words)
 
 
 
-    # khác số lượng từ
+    dp = [
 
+        [0]*(n+1)
 
-    if len(ref_words) != len(hyp_words):
+        for _ in range(m+1)
 
-
-        errors.append(
-
-            "multi_component_error"
-
-        )
-
-
-        return errors
+    ]
 
 
 
+    for i in range(m+1):
+
+        dp[i][0] = i
+
+
+
+    for j in range(n+1):
+
+        dp[0][j] = j
 
 
 
 
 
-    for r,h in zip(
-        ref_words,
-        hyp_words
-    ):
+    for i in range(1,m+1):
+
+        for j in range(1,n+1):
 
 
+            cost = (
 
-        if r != h:
+                0
 
+                if ref_words[i-1]
 
-            word_errors, _ = detect_word_error(
+                ==
 
-                r,
+                hyp_words[j-1]
 
-                h
+                else
+
+                1
 
             )
 
 
-            errors.extend(
+            dp[i][j] = min(
 
-                word_errors
+                dp[i-1][j]+1,
+
+                dp[i][j-1]+1,
+
+                dp[i-1][j-1]+cost
 
             )
 
@@ -250,14 +290,165 @@ def simple_error_check(
 
 
 
+    alignment = []
 
 
-    return list(
+    i = m
 
-        set(errors)
+    j = n
 
-    )
 
+
+    while i > 0 or j > 0:
+
+
+
+        if (
+
+            i > 0
+
+            and
+
+            j > 0
+
+            and
+
+            ref_words[i-1]
+
+            ==
+
+            hyp_words[j-1]
+
+        ):
+
+
+            alignment.append({
+
+                "type":"equal",
+
+                "reference":
+
+                ref_words[i-1],
+
+                "prediction":
+
+                hyp_words[j-1]
+
+            })
+
+
+            i -= 1
+
+            j -= 1
+
+
+
+
+        elif (
+
+            i > 0
+
+            and
+
+            j > 0
+
+            and
+
+            dp[i][j]
+
+            ==
+
+            dp[i-1][j-1]+1
+
+        ):
+
+
+            alignment.append({
+
+                "type":"substitution",
+
+                "reference":
+
+                ref_words[i-1],
+
+                "prediction":
+
+                hyp_words[j-1]
+
+            })
+
+
+            i -= 1
+
+            j -= 1
+
+
+
+
+
+        elif (
+
+            i > 0
+
+            and
+
+            dp[i][j]
+
+            ==
+
+            dp[i-1][j]+1
+
+        ):
+
+
+            alignment.append({
+
+                "type":"missing_word",
+
+                "reference":
+
+                ref_words[i-1],
+
+                "prediction":
+
+                ""
+
+            })
+
+
+            i -= 1
+
+
+
+
+        else:
+
+
+            alignment.append({
+
+                "type":"extra_word",
+
+                "reference":
+
+                "",
+
+                "prediction":
+
+                hyp_words[j-1]
+
+            })
+
+
+            j -= 1
+
+
+
+
+
+    alignment.reverse()
+
+
+    return alignment
 
 
 
@@ -266,7 +457,7 @@ def simple_error_check(
 
 
 # =====================================================
-# PHÂN TÍCH CHI TIẾT TỪNG TỪ
+# SENTENCE PHONEME ANALYSIS
 # =====================================================
 
 
@@ -276,23 +467,15 @@ def analyze_sentence_phoneme(
 ):
 
 
-    ref_words = reference.split()
-
-
-    hyp_words = prediction.split()
-
-
-
     result = []
 
 
 
+    alignment = word_alignment(
 
-    max_len = max(
+        reference,
 
-        len(ref_words),
-
-        len(hyp_words)
+        prediction
 
     )
 
@@ -300,75 +483,47 @@ def analyze_sentence_phoneme(
 
 
 
-    for i in range(max_len):
+    for item in alignment:
 
 
-        ref = (
-
-            ref_words[i]
-
-            if i < len(ref_words)
-
-            else ""
-
-        )
+        typ = item["type"]
 
 
+        ref = item["reference"]
 
-        hyp = (
 
-            hyp_words[i]
-
-            if i < len(hyp_words)
-
-            else ""
-
-        )
+        hyp = item["prediction"]
 
 
 
 
 
+        if typ == "equal":
 
-
-        if ref != hyp and ref and hyp:
-
-
-
-            try:
-
-
-                detail = analyze_word(
-
-                    ref,
-
-                    hyp
-
-                )
+            continue
 
 
 
-            except Exception as e:
 
 
-
-                detail = {
-
-
-                    "error":
-
-                    str(e)
+        if typ == "substitution":
 
 
-                }
+            errors, detail = detect_word_error(
 
+                ref,
 
+                hyp
 
+            )
 
 
 
             result.append({
 
+                "type":
+
+                "substitution",
 
 
                 "reference":
@@ -376,21 +531,103 @@ def analyze_sentence_phoneme(
                 ref,
 
 
-
                 "prediction":
 
                 hyp,
 
+
+                "errors":
+
+                errors,
 
 
                 "detail":
 
                 detail
 
+            })
 
+
+
+
+
+
+
+        elif typ == "missing_word":
+
+
+            result.append({
+
+                "type":
+
+                "missing_word",
+
+
+                "reference":
+
+                ref,
+
+
+                "prediction":
+
+                "",
+
+
+                "errors":
+
+                [
+
+                    "missing_word"
+
+                ],
+
+
+                "detail":
+
+                None
 
             })
 
+
+
+
+
+
+
+        elif typ == "extra_word":
+
+
+            result.append({
+
+                "type":
+
+                "extra_word",
+
+
+                "reference":
+
+                "",
+
+
+                "prediction":
+
+                hyp,
+
+
+                "errors":
+
+                [
+
+                    "extra_word"
+
+                ],
+
+
+                "detail":
+
+                None
+
+            })
 
 
 
@@ -404,11 +641,52 @@ def analyze_sentence_phoneme(
 
 
 
+# =====================================================
+# ERROR TYPE SUMMARY
+# =====================================================
+
+
+def simple_error_check(
+        reference,
+        prediction
+):
+
+
+    errors = []
+
+
+    analysis = analyze_sentence_phoneme(
+
+        reference,
+
+        prediction
+
+    )
+
+
+
+    for item in analysis:
+
+
+        errors.extend(
+
+            item["errors"]
+
+        )
+
+
+
+
+    return list(set(errors))
+
+
+
+
 
 
 
 # =====================================================
-# PHÂN TÍCH 1 AUDIO
+# MAIN ANALYZER
 # =====================================================
 
 
@@ -417,7 +695,6 @@ def analyze_result(
         reference,
         prediction
 ):
-
 
 
     score = calculate_score(
@@ -430,8 +707,6 @@ def analyze_result(
 
 
 
-
-
     errors = simple_error_check(
 
         reference,
@@ -439,9 +714,6 @@ def analyze_result(
         prediction
 
     )
-
-
-
 
 
 
@@ -456,11 +728,7 @@ def analyze_result(
 
 
 
-
-
-
     return {
-
 
 
         "audio":
@@ -471,13 +739,13 @@ def analyze_result(
 
         "ground_truth":
 
-        reference,
+        normalize_sentence(reference),
 
 
 
         "prediction":
 
-        prediction,
+        normalize_sentence(prediction),
 
 
 
@@ -490,8 +758,6 @@ def analyze_result(
         "cer":
 
         score["cer"],
-
-
 
 
 
@@ -511,20 +777,14 @@ def analyze_result(
 
 
 
-
-
         "errors":
 
         errors,
 
 
 
-
-
         "word_analysis":
 
         word_analysis
-
-
 
     }

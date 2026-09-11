@@ -1,10 +1,4 @@
 {
-  "a": {
-    "initial": "",
-    "nucleus": "a",
-    "final": "",
-    "tone": "ngang"
-  },
   "aa": {
     "initial": "",
     "nucleus": "aa",
@@ -1505,12 +1499,6 @@
     "final": "",
     "tone": "ngang"
   },
-  "b": {
-    "initial": "b",
-    "nucleus": "",
-    "final": "",
-    "tone": "ngang"
-  },
   "ba": {
     "initial": "b",
     "nucleus": "a",
@@ -2115,12 +2103,6 @@
     "initial": "b",
     "nucleus": "bffada",
     "final": "",
-    "tone": "ngang"
-  },
-  "bc": {
-    "initial": "b",
-    "nucleus": "",
-    "final": "c",
     "tone": "ngang"
   },
   "bca": {
@@ -4067,12 +4049,6 @@
     "final": "c",
     "tone": "nặng"
   },
-  "c": {
-    "initial": "c",
-    "nucleus": "",
-    "final": "",
-    "tone": "ngang"
-  },
   "ca": {
     "initial": "c",
     "nucleus": "a",
@@ -4581,12 +4557,6 @@
     "initial": "c",
     "nucleus": "bff",
     "final": "",
-    "tone": "ngang"
-  },
-  "cc": {
-    "initial": "c",
-    "nucleus": "",
-    "final": "c",
     "tone": "ngang"
   },
   "cca": {
@@ -7121,12 +7091,6 @@
     "final": "c",
     "tone": "nặng"
   },
-  "d": {
-    "initial": "d",
-    "nucleus": "",
-    "final": "",
-    "tone": "ngang"
-  },
   "da": {
     "initial": "d",
     "nucleus": "a",
@@ -7653,12 +7617,6 @@
     "initial": "d",
     "nucleus": "bffd",
     "final": "",
-    "tone": "ngang"
-  },
-  "dc": {
-    "initial": "d",
-    "nucleus": "",
-    "final": "c",
     "tone": "ngang"
   },
   "dca": {
@@ -9365,12 +9323,6 @@
     "final": "ng",
     "tone": "nặng"
   },
-  "e": {
-    "initial": "",
-    "nucleus": "e",
-    "final": "",
-    "tone": "ngang"
-  },
   "ea": {
     "initial": "",
     "nucleus": "ea",
@@ -10844,12 +10796,6 @@
   "exciter": {
     "initial": "",
     "nucleus": "exciter",
-    "final": "",
-    "tone": "ngang"
-  },
-  "f": {
-    "initial": "",
-    "nucleus": "f",
     "final": "",
     "tone": "ngang"
   },
@@ -12833,22 +12779,10 @@
     "final": "",
     "tone": "ngã"
   },
-  "gì": {
-    "initial": "gi",
-    "nucleus": "",
-    "final": "",
-    "tone": "huyền"
-  },
   "gìa": {
     "initial": "gi",
     "nucleus": "a",
     "final": "",
-    "tone": "huyền"
-  },
-  "gìn": {
-    "initial": "gi",
-    "nucleus": "",
-    "final": "n",
     "tone": "huyền"
   },
   "gòn": {
@@ -14031,12 +13965,6 @@
     "initial": "",
     "nucleus": "interne",
     "final": "t",
-    "tone": "ngang"
-  },
-  "k": {
-    "initial": "k",
-    "nucleus": "",
-    "final": "",
     "tone": "ngang"
   },
   "kamen": {
@@ -16059,12 +15987,6 @@
     "initial": "m",
     "nucleus": "o",
     "final": "ng",
-    "tone": "ngang"
-  },
-  "mp": {
-    "initial": "m",
-    "nucleus": "",
-    "final": "p",
     "tone": "ngang"
   },
   "mua": {
@@ -22925,12 +22847,6 @@
     "final": "",
     "tone": "nặng"
   },
-  "u": {
-    "initial": "",
-    "nucleus": "u",
-    "final": "",
-    "tone": "ngang"
-  },
   "ung": {
     "initial": "",
     "nucleus": "u",
@@ -24059,12 +23975,6 @@
     "final": "",
     "tone": "hỏi"
   },
-  "y": {
-    "initial": "",
-    "nucleus": "y",
-    "final": "",
-    "tone": "ngang"
-  },
   "yên": {
     "initial": "",
     "nucleus": "yê",
@@ -24101,12 +24011,6 @@
     "final": "m",
     "tone": "ngang"
   },
-  "à": {
-    "initial": "",
-    "nucleus": "a",
-    "final": "",
-    "tone": "huyền"
-  },
   "àm": {
     "initial": "",
     "nucleus": "a",
@@ -24118,12 +24022,6 @@
     "nucleus": "ao",
     "final": "",
     "tone": "huyền"
-  },
-  "á": {
-    "initial": "",
-    "nucleus": "a",
-    "final": "",
-    "tone": "sắc"
   },
   "ác": {
     "initial": "",
@@ -24203,12 +24101,6 @@
     "final": "p",
     "tone": "sắc"
   },
-  "ê": {
-    "initial": "",
-    "nucleus": "ê",
-    "final": "",
-    "tone": "ngang"
-  },
   "êm": {
     "initial": "",
     "nucleus": "ê",
@@ -24245,12 +24137,6 @@
     "final": "ng",
     "tone": "sắc"
   },
-  "ô": {
-    "initial": "",
-    "nucleus": "ô",
-    "final": "",
-    "tone": "ngang"
-  },
   "ôi": {
     "initial": "",
     "nucleus": "ôi",
@@ -24285,12 +24171,6 @@
     "initial": "",
     "nucleus": "u",
     "final": "ng",
-    "tone": "sắc"
-  },
-  "ý": {
-    "initial": "",
-    "nucleus": "y",
-    "final": "",
     "tone": "sắc"
   },
   "ăn": {
@@ -25313,12 +25193,6 @@
     "final": "ng",
     "tone": "nặng"
   },
-  "ơ": {
-    "initial": "",
-    "nucleus": "ơ",
-    "final": "",
-    "tone": "ngang"
-  },
   "ơi": {
     "initial": "",
     "nucleus": "ơi",
@@ -25329,12 +25203,6 @@
     "initial": "",
     "nucleus": "ơ",
     "final": "n",
-    "tone": "ngang"
-  },
-  "ư": {
-    "initial": "",
-    "nucleus": "ư",
-    "final": "",
     "tone": "ngang"
   },
   "ưa": {
@@ -25378,18 +25246,6 @@
     "nucleus": "ươ",
     "final": "n",
     "tone": "ngã"
-  },
-  "ạ": {
-    "initial": "",
-    "nucleus": "a",
-    "final": "",
-    "tone": "nặng"
-  },
-  "ả": {
-    "initial": "",
-    "nucleus": "a",
-    "final": "",
-    "tone": "hỏi"
   },
   "ải": {
     "initial": "",
@@ -25511,12 +25367,6 @@
     "final": "m",
     "tone": "ngã"
   },
-  "ẻ": {
-    "initial": "",
-    "nucleus": "e",
-    "final": "",
-    "tone": "hỏi"
-  },
   "ốc": {
     "initial": "",
     "nucleus": "ô",
@@ -25541,12 +25391,6 @@
     "final": "p",
     "tone": "sắc"
   },
-  "ồ": {
-    "initial": "",
-    "nucleus": "ô",
-    "final": "",
-    "tone": "huyền"
-  },
   "ồm": {
     "initial": "",
     "nucleus": "ô",
@@ -25558,12 +25402,6 @@
     "nucleus": "ô",
     "final": "n",
     "tone": "huyền"
-  },
-  "ổ": {
-    "initial": "",
-    "nucleus": "ô",
-    "final": "",
-    "tone": "hỏi"
   },
   "ổi": {
     "initial": "",
@@ -25577,40 +25415,16 @@
     "final": "n",
     "tone": "hỏi"
   },
-  "ớ": {
-    "initial": "",
-    "nucleus": "ơ",
-    "final": "",
-    "tone": "sắc"
-  },
   "ớt": {
     "initial": "",
     "nucleus": "ơ",
     "final": "t",
     "tone": "sắc"
   },
-  "ờ": {
-    "initial": "",
-    "nucleus": "ơ",
-    "final": "",
-    "tone": "huyền"
-  },
-  "ở": {
-    "initial": "",
-    "nucleus": "ơ",
-    "final": "",
-    "tone": "hỏi"
-  },
   "ởn": {
     "initial": "",
     "nucleus": "ơ",
     "final": "n",
-    "tone": "hỏi"
-  },
-  "ủ": {
-    "initial": "",
-    "nucleus": "u",
-    "final": "",
     "tone": "hỏi"
   },
   "ủng": {
@@ -25636,12 +25450,6 @@
     "nucleus": "ư",
     "final": "ng",
     "tone": "sắc"
-  },
-  "ừ": {
-    "initial": "",
-    "nucleus": "ư",
-    "final": "",
-    "tone": "huyền"
   },
   "ửng": {
     "initial": "",

@@ -26,14 +26,25 @@ function App() {
 
   const [loading, setLoading] = useState(true);
 
+  const [selectedAudio, setSelectedAudio] = useState(null);
 
 
-  useEffect(() => {
+
+
+
+  // ==========================
+  // LOAD DATA
+  // ==========================
+
+
+  useEffect(()=>{
 
 
     axios
-      .get("http://127.0.0.1:8000/report")
-      .then(res => {
+      .get(
+        "http://127.0.0.1:8000/report"
+      )
+      .then(res=>{
 
         setReport(res.data);
 
@@ -42,8 +53,10 @@ function App() {
 
 
     axios
-      .get("http://127.0.0.1:8000/analysis")
-      .then(res => {
+      .get(
+        "http://127.0.0.1:8000/analysis"
+      )
+      .then(res=>{
 
 
         setAnalysis(
@@ -53,10 +66,14 @@ function App() {
 
         setLoading(false);
 
+
       });
 
 
-  }, []);
+
+  },[]);
+
+
 
 
 
@@ -82,9 +99,11 @@ function App() {
 
 
 
-  // =============================
-  // THỐNG KÊ
-  // =============================
+
+
+  // ==========================
+  // STATISTICS
+  // ==========================
 
 
   const totalAudio =
@@ -95,44 +114,58 @@ function App() {
   const correct =
     analysis.filter(
       item =>
-      item.status === "Đúng"
-    ).length;
+      item.status==="Đúng"
+    )
+    .length;
+
 
 
 
   const wrong =
     analysis.filter(
       item =>
-      item.status === "Sai"
-    ).length;
+      item.status==="Sai"
+    )
+    .length;
+
+
 
 
 
   const avgWER =
-    (
-      report.tong_quan.WER_trung_binh
-      *
-      100
-    )
-    .toFixed(2);
+  (
+    report
+    .tong_quan
+    .WER_trung_binh
+    *
+    100
+  )
+  .toFixed(2);
+
+
 
 
 
   const avgCER =
-    (
-      report.tong_quan.CER_trung_binh
-      *
-      100
-    )
-    .toFixed(2);
+  (
+    report
+    .tong_quan
+    .CER_trung_binh
+    *
+    100
+  )
+  .toFixed(2);
 
 
 
 
 
-  // =============================
-  // DỊCH LỖI
-  // =============================
+
+
+
+  // ==========================
+  // ERROR TRANSLATE
+  // ==========================
 
 
   function translateError(error){
@@ -177,12 +210,15 @@ function App() {
 
 
 
-  // =============================
-  // FILTER DATA
-  // =============================
 
 
-  let tableData = analysis;
+  // ==========================
+  // FILTER
+  // ==========================
+
+
+  let tableData =
+    analysis;
 
 
 
@@ -190,13 +226,15 @@ function App() {
 
 
     tableData =
-      tableData.filter(
-        item =>
-        item.status==="Sai"
-      );
+    tableData.filter(
+      item =>
+      item.status==="Sai"
+    );
 
 
   }
+
+
 
 
 
@@ -204,13 +242,16 @@ function App() {
 
 
     tableData =
-      tableData.filter(
-        item =>
-        item.status==="Đúng"
-      );
+    tableData.filter(
+      item =>
+      item.status==="Đúng"
+    );
 
 
   }
+
+
+
 
 
 
@@ -219,26 +260,26 @@ function App() {
 
 
     tableData =
-      tableData.filter(
-        item =>
+    tableData.filter(item=>
 
 
-        item.ground_truth
-        .toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+      item.ground_truth
+      .toLowerCase()
+      .includes(
+        search.toLowerCase()
+      )
 
 
-        ||
+      ||
 
-        item.prediction
-        .toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+      item.prediction
+      .toLowerCase()
+      .includes(
+        search.toLowerCase()
+      )
 
-      );
+
+    );
 
 
   }
@@ -247,12 +288,16 @@ function App() {
 
 
 
-  // =============================
+
+
+
+
+  // ==========================
   // ERROR CHART
-  // =============================
+  // ==========================
 
 
-  const errorCount = {};
+  const errorMap={};
 
 
 
@@ -262,11 +307,15 @@ function App() {
     item.errors.forEach(error=>{
 
 
-      errorCount[error] =
+      errorMap[error]
+      =
       (
-        errorCount[error] || 0
+        errorMap[error]
+        ||
+        0
       )
       +1;
+
 
 
     });
@@ -276,28 +325,24 @@ function App() {
 
 
 
+
   const chartData =
 
-    Object
-    .entries(errorCount)
-    .map(
-      ([name,value])=>({
+  Object
+  .entries(errorMap)
+  .map(
+    ([name,value])=>({
 
-        name:
-        translateError(name),
+      name:
+      translateError(name),
 
-        value,
+      value
 
-        percent:
-        (
-          value /
-          analysis.length *
-          100
-        )
-        .toFixed(1)
+    })
+  );
 
-      })
-    );
+
+
 
 
 
@@ -308,16 +353,28 @@ function App() {
 <div className="dashboard">
 
 
+
+
+
 <h1>
 Vietnamese ASR Error Analyzer
 </h1>
 
 
+
 <p className="subtitle">
+
 Whisper Vietnamese Speech Recognition Evaluation Dashboard
+
 </p>
 
 
+
+
+
+
+
+{/* ================= CARD ================= */}
 
 
 
@@ -393,11 +450,18 @@ WER / CER
 
 
 
-
 </div>
-// =============================
-// ERROR CHART
-// =============================
+
+
+
+
+
+
+
+
+
+{/* ================= CHART ================= */}
+
 
 
 <div className="section">
@@ -406,6 +470,7 @@ WER / CER
 <h2>
 Phân bố lỗi tiếng Việt
 </h2>
+
 
 
 <div className="chart-box">
@@ -430,14 +495,7 @@ dataKey="name"
 <YAxis/>
 
 
-<Tooltip
-formatter={
-(value,name,item)=>[
-`${value} lỗi (${item.payload.percent}%)`,
-"Lỗi"
-]
-}
-/>
+<Tooltip/>
 
 
 <Bar
@@ -460,9 +518,11 @@ dataKey="value"
 
 
 
-{/* =============================
-    TABLE ANALYSIS
-============================= */}
+
+
+
+
+{/* ================= TABLE ================= */}
 
 
 
@@ -480,9 +540,7 @@ Phân tích từng Audio
 
 
 <button
-onClick={() =>
-setFilter("all")
-}
+onClick={()=>setFilter("all")}
 >
 Tất cả
 </button>
@@ -490,9 +548,7 @@ Tất cả
 
 
 <button
-onClick={() =>
-setFilter("wrong")
-}
+onClick={()=>setFilter("wrong")}
 >
 Chỉ lỗi
 </button>
@@ -500,15 +556,15 @@ Chỉ lỗi
 
 
 <button
-onClick={() =>
-setFilter("correct")
-}
+onClick={()=>setFilter("correct")}
 >
 Chính xác
 </button>
 
 
+
 </div>
+
 
 
 
@@ -518,13 +574,12 @@ Chính xác
 
 className="search"
 
-placeholder="Tìm kiếm câu nhận dạng..."
+placeholder="Tìm kiếm câu..."
 
 value={search}
 
 onChange={
-e =>
-setSearch(e.target.value)
+e=>setSearch(e.target.value)
 }
 
 />
@@ -578,8 +633,8 @@ Lỗi
 </th>
 
 
-
 </tr>
+
 
 </thead>
 
@@ -594,43 +649,38 @@ Lỗi
 {
 
 tableData.map(
-
 (item,index)=>(
 
 
 <tr
+
 key={index}
+
+className="click-row"
+
+onClick={()=>
+setSelectedAudio(item)
+}
+
 >
 
 
 
-
 <td>
-
 {item.audio}
-
 </td>
 
 
 
-
-
 <td>
-
 {item.ground_truth}
-
 </td>
 
 
 
-
-
 <td>
-
 {item.prediction}
-
 </td>
-
 
 
 
@@ -638,58 +688,22 @@ key={index}
 <td>
 
 {
-
-item.wer !== undefined
-
-?
-
-(
-item.wer * 100
-)
+(item.wer*100)
 .toFixed(2)
-+
-
-"%"
-
-:
-
-"-"
-
-}
+}%
 
 </td>
-
-
-
 
 
 
 <td>
 
 {
-
-item.cer !== undefined
-
-?
-
-(
-item.cer * 100
-)
+(item.cer*100)
 .toFixed(2)
-+
-
-"%"
-
-:
-
-"-"
-
-}
+}%
 
 </td>
-
-
-
 
 
 
@@ -700,45 +714,29 @@ item.cer * 100
 <span
 
 className={
-
 item.status==="Đúng"
-
 ?
-
 "status-good"
-
 :
-
 "status-bad"
-
 }
 
 >
 
 
 {
-
 item.status==="Đúng"
-
 ?
-
 "✓ Đúng"
-
 :
-
 "✗ Sai"
-
 }
 
 
 </span>
 
 
-
 </td>
-
-
-
 
 
 
@@ -752,7 +750,6 @@ item.errors.length===0
 
 ?
 
-
 <span className="success">
 
 Không lỗi
@@ -764,7 +761,6 @@ Không lỗi
 
 
 item.errors.map(
-
 (error,i)=>(
 
 
@@ -797,18 +793,12 @@ className="error-badge"
 
 
 
-
 </tr>
 
 
 )
 
-
-)
-
-
 }
-
 
 
 </tbody>
@@ -821,6 +811,197 @@ className="error-badge"
 </div>
 
 
+
+
+
+
+
+
+
+{/* ================= MODAL ================= */}
+
+
+
+{
+
+selectedAudio &&
+
+
+<div className="modal-overlay">
+
+
+
+<div className="modal">
+
+
+
+<button
+
+className="close-btn"
+
+onClick={()=>
+setSelectedAudio(null)
+}
+
+>
+×
+</button>
+
+
+
+<h2>
+Chi tiết phân tích
+</h2>
+
+
+
+<h3>
+Audio
+</h3>
+
+<p>
+{selectedAudio.audio}
+</p>
+
+
+
+
+<h3>
+Câu chuẩn
+</h3>
+
+<p>
+
+{selectedAudio.ground_truth}
+
+</p>
+
+
+
+
+<h3>
+Whisper nhận dạng
+</h3>
+
+<p>
+
+{selectedAudio.prediction}
+
+</p>
+
+
+
+
+
+
+<div className="score-box">
+
+
+<div>
+
+WER
+
+<strong>
+
+{
+(selectedAudio.wer*100)
+.toFixed(2)
+}%
+
+</strong>
+
+</div>
+
+
+
+
+<div>
+
+CER
+
+<strong>
+
+{
+(selectedAudio.cer*100)
+.toFixed(2)
+}%
+
+</strong>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<h3>
+Phân tích lỗi
+</h3>
+
+
+
+<div>
+
+
+{
+
+selectedAudio.errors.length===0
+
+?
+
+<span className="success">
+
+Không có lỗi
+
+</span>
+
+
+:
+
+selectedAudio.errors.map(
+(error,index)=>(
+
+
+<span
+
+key={index}
+
+className="error-badge"
+
+>
+
+{translateError(error)}
+
+</span>
+
+
+)
+
+
+)
+
+
+}
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+}
 
 
 

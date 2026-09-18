@@ -1,396 +1,769 @@
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
+
 import axios from "axios";
 
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
+  ResponsiveContainer,
   Tooltip,
-  ResponsiveContainer
+  XAxis,
+  YAxis
 } from "recharts";
 
 import "./App.css";
 
 
-
-function App() {
-
-
-  // ==========================
-  // STATE
-  // ==========================
-
-
-  const [report,setReport] = useState(null);
-
-  const [analysis,setAnalysis] = useState([]);
-
-  const [loading,setLoading] = useState(true);
-
-  const [filter,setFilter] = useState("all");
-
-  const [search,setSearch] = useState("");
-
-  const [selectedAudio,setSelectedAudio] = useState(null);
+const API =
+  import.meta.env.VITE_API_URL ??
+  "http://127.0.0.1:8000";
 
 
 
+const ERROR_LABELS = {
 
-  // ==========================
-  // LOAD API
-  // ==========================
+  tone_error:
+  "Sai thanh điệu",
+
+  nucleus_error:
+  "Sai âm chính",
+
+  initial_consonant_error:
+  "Sai phụ âm đầu",
+
+  final_consonant_error:
+  "Sai âm cuối",
+
+  missing_word:
+  "Mất từ",
+
+  merge_word:
+  "Gộp từ",
+
+  split_word:
+  "Tách từ",
+
+  extra_word:
+  "Thêm từ"
+
+};
 
 
-  useEffect(()=>{
 
+function translateError(e){
 
-    axios
-    .get(
-      "http://127.0.0.1:8000/report"
-    )
-    .then(res=>{
+  return ERROR_LABELS[e] ?? e;
 
-      setReport(res.data);
-
-    })
-    .catch(err=>{
-
-      console.log(err);
-
-    });
+}
 
 
 
 
+const STATUS_MAP = {
 
-    axios
-    .get(
-      "http://127.0.0.1:8000/analysis"
-    )
-    .then(res=>{
+  "Đúng":
+  "correct",
 
+  "Sai":
+  "incorrect",
 
-      setAnalysis(
-        res.data.data || []
-      );
+  "Lỗi phân tích":
+  "failed",
 
+  correct:
+  "correct",
 
-      setLoading(false);
+  incorrect:
+  "incorrect",
 
+  failed:
+  "failed"
 
-    })
-    .catch(err=>{
-
-
-      console.log(err);
-
-
-      setLoading(false);
-
-
-    });
+};
 
 
 
-  },[]);
+function getStatus(item){
+
+  return STATUS_MAP[item.status] ?? "failed";
+
+}
 
 
 
 
+const STATUS_LABEL = {
+
+  correct:
+  "✓ Đúng",
+
+  incorrect:
+  "✗ Sai",
+
+  failed:
+  "⚠ Lỗi phân tích"
+
+};
 
 
-  // ==========================
-  // LOADING
-  // ==========================
+
+
+
+
+function formatPercent(value){
+
+  const number = Number(value);
 
 
   if(
-    loading ||
-    !report
+    !Number.isFinite(number)
   ){
 
-
-    return (
-
-      <div className="loading">
-
-        Đang tải dữ liệu...
-
-      </div>
-
-    );
-
+    return "—";
 
   }
-
-
-
-
-
-
-
-  // ==========================
-  // STATISTIC
-  // ==========================
-
-
-  const totalAudio =
-    analysis.length;
-
-
-
-  const correct =
-    analysis.filter(
-      item =>
-      item.status==="Đúng"
-    ).length;
-
-
-
-
-  const wrong =
-    analysis.filter(
-      item =>
-      item.status==="Sai"
-    ).length;
-
-
-
-
-
-
-  const werAverage =
-
-  (
-    report
-    ?.tong_quan
-    ?.WER_trung_binh || 0
-  )
-
-  *100;
-
-
-
-  const cerAverage =
-
-  (
-    report
-    ?.tong_quan
-    ?.CER_trung_binh || 0
-  )
-
-  *100;
-
-
-
-
-
-
-
-  // ==========================
-  // ERROR TRANSLATE
-  // ==========================
-
-
-  function translateError(error){
-
-
-    const map={
-
-
-      tone_error:
-      "Sai thanh điệu",
-
-
-      initial_consonant_error:
-      "Sai phụ âm đầu",
-
-
-      final_consonant_error:
-      "Sai âm cuối",
-
-
-      nucleus_error:
-      "Sai âm chính",
-
-
-      multi_component_error:
-      "Sai nhiều thành phần",
-
-
-      non_vietnamese_token:
-      "Token ngoài tiếng Việt"
-
-
-
-    };
-
-
-    return map[error] || error;
-
-
-  }
-
-
-
-
-
-
-
-  // ==========================
-  // FILTER
-  // ==========================
-
-
-  let tableData=[...analysis];
-
-
-
-  if(filter==="wrong"){
-
-
-    tableData =
-
-    tableData.filter(
-      item=>
-      item.status==="Sai"
-    );
-
-
-  }
-
-
-
-
-
-  if(filter==="correct"){
-
-
-    tableData =
-
-    tableData.filter(
-      item=>
-      item.status==="Đúng"
-    );
-
-
-  }
-
-
-
-
-
-
-  if(search.trim()!==""){
-
-
-    tableData =
-
-    tableData.filter(item=>
-
-      item.ground_truth
-      .toLowerCase()
-      .includes(
-        search.toLowerCase()
-      )
-
-      ||
-
-      item.prediction
-      .toLowerCase()
-      .includes(
-        search.toLowerCase()
-      )
-
-    );
-
-
-  }
-
-
-
-
-
-
-
-  // ==========================
-  // CHART
-  // ==========================
-
-
-  const errorCount={};
-
-
-
-  analysis.forEach(item=>{
-
-
-    item.errors.forEach(error=>{
-
-
-      errorCount[error] =
-      (
-        errorCount[error] || 0
-      )
-      +1;
-
-
-    });
-
-
-  });
-
-
-
-
-  const chartData =
-
-  Object
-  .entries(errorCount)
-  .map(([name,value])=>({
-
-
-    name:
-    translateError(name),
-
-
-    value
-
-
-  }));
-
-
-  // ==========================
-  // RETURN UI
-  // ==========================
 
 
   return (
+
+    number * 100
+
+  ).toFixed(2) + "%";
+
+}
+
+
+
+
+
+
+
+function StatCard({
+  title,
+  value,
+  className
+}){
+
+
+  return (
+
+    <div className="card">
+
+      <h3>
+        {title}
+      </h3>
+
+
+      <strong className={className}>
+        {value ?? 0}
+      </strong>
+
+
+    </div>
+
+  );
+
+}
+
+
+
+
+
+
+
+
+
+function DetailModal({
+  data,
+  onClose
+}){
+
+
+  return (
+
+    <div
+      className="modal-overlay"
+      onClick={onClose}
+    >
+
+
+      <div
+
+        className="modal"
+
+        onClick={
+          e=>e.stopPropagation()
+        }
+
+      >
+
+
+
+        <button
+
+          className="close-btn"
+
+          onClick={onClose}
+
+        >
+
+          X
+
+        </button>
+
+
+
+
+
+        <h2>
+          Chi tiết phân tích
+        </h2>
+
+
+
+
+
+        <h3>
+          Audio
+        </h3>
+
+        <p>
+          {data.audio}
+        </p>
+
+
+
+
+
+        <h3>
+          Câu chuẩn
+        </h3>
+
+        <div className="text-box">
+
+          {data.ground_truth}
+
+        </div>
+
+
+
+
+
+        <h3>
+          Whisper
+        </h3>
+
+
+        <div className="text-box">
+
+          {data.prediction}
+
+        </div>
+
+
+
+
+
+        <h3>
+          WER / CER
+        </h3>
+
+
+        <p>
+
+          {formatPercent(data.wer)}
+
+          {" / "}
+
+          {formatPercent(data.cer)}
+
+        </p>
+
+
+
+
+
+        <h3>
+          Phân loại lỗi
+        </h3>
+
+
+        {
+
+          data.errors?.length === 0
+
+          ?
+
+          <p>
+            Không có lỗi
+          </p>
+
+          :
+
+          data.errors.map(
+            (e,index)=>(
+
+              <span
+
+                key={index}
+
+                className="error-badge"
+
+              >
+
+                {translateError(e)}
+
+              </span>
+
+            )
+
+          )
+
+        }
+
+
+
+
+
+
+
+
+        {
+          data.word_analysis &&
+
+          data.word_analysis.length > 0 &&
+
+
+          <>
+
+          <h3>
+            Chi tiết lỗi phát âm
+          </h3>
+
+
+
+          {
+            data.word_analysis.map(
+              (item,index)=>(
+
+
+                <div
+
+                  key={index}
+
+                  className="word-card"
+
+                >
+
+
+                  <b>
+
+                    {item.reference}
+
+                    {" → "}
+
+                    {item.prediction}
+
+                  </b>
+
+
+
+                  {
+
+                    item.detail &&
+
+                    <div>
+
+
+                      <p>
+
+                      Âm đầu:
+
+                      {" "}
+
+                      {
+                        item.detail.initial.reference
+                      }
+
+                      {" → "}
+
+                      {
+                        item.detail.initial.prediction
+                      }
+
+
+                      </p>
+
+
+
+                      <p>
+
+                      Âm chính:
+
+                      {" "}
+
+                      {
+                        item.detail.nucleus.reference
+                      }
+
+                      {" → "}
+
+                      {
+                        item.detail.nucleus.prediction
+                      }
+
+
+                      </p>
+
+
+
+                      <p>
+
+                      Âm cuối:
+
+                      {" "}
+
+                      {
+                        item.detail.final.reference || "-"
+                      }
+
+                      {" → "}
+
+                      {
+                        item.detail.final.prediction || "-"
+                      }
+
+
+                      </p>
+
+
+
+                      <p>
+
+                      Thanh điệu:
+
+                      {" "}
+
+                      {
+                        item.detail.tone.reference
+                      }
+
+                      {" → "}
+
+                      {
+                        item.detail.tone.prediction
+                      }
+
+
+                      </p>
+
+
+                    </div>
+
+
+                  }
+
+
+
+                </div>
+
+
+              )
+
+            )
+
+          }
+
+
+          </>
+
+        }
+
+
+
+      </div>
+
+
+    </div>
+
+  );
+
+}
+
+
+
+
+
+
+
+
+
+export default function App(){
+
+
+
+const [statistics,setStatistics]
+=
+useState(null);
+
+
+
+const [audioList,setAudioList]
+=
+useState([]);
+
+
+
+const [selected,setSelected]
+=
+useState(null);
+
+
+
+const [loading,setLoading]
+=
+useState(true);
+
+
+
+const [filter,setFilter]
+=
+useState("all");
+
+
+
+const [search,setSearch]
+=
+useState("");
+
+
+
+const [error,setError]
+=
+useState(null);
+
+
+
+
+
+
+
+useEffect(()=>{
+
+
+Promise.all([
+
+axios.get(
+`${API}/api/statistics`
+),
+
+axios.get(
+`${API}/api/audio-list`
+)
+
+])
+
+
+.then(([s,a])=>{
+
+
+setStatistics(
+s.data
+);
+
+
+setAudioList(
+a.data.data ?? []
+);
+
+
+})
+
+
+.catch(()=>{
+
+
+setError(
+"Không tải được dữ liệu backend"
+);
+
+
+})
+
+
+.finally(()=>{
+
+
+setLoading(false);
+
+
+});
+
+
+},[]);
+
+
+
+
+
+
+
+const openDetail =
+useCallback(async(audio)=>{
+
+
+try{
+
+
+const res =
+await axios.get(
+
+`${API}/api/audio-detail/${encodeURIComponent(audio)}`
+
+);
+
+
+setSelected(
+res.data
+);
+
+
+}
+
+catch(e){
+
+console.log(e);
+
+}
+
+
+},[]);
+
+
+
+
+
+
+
+let tableData =
+audioList;
+
+
+
+if(filter!=="all"){
+
+
+tableData =
+tableData.filter(
+
+x=>
+
+getStatus(x)===filter
+
+);
+
+
+}
+
+
+
+
+
+if(search.trim()){
+
+
+tableData =
+tableData.filter(
+
+x=>
+
+x.audio
+.toLowerCase()
+.includes(
+search.toLowerCase()
+)
+
+);
+
+
+}
+
+
+
+
+
+
+
+const chartData =
+useMemo(()=>{
+
+
+return Object.entries(
+
+statistics?.error_distribution ?? {}
+
+)
+
+.map(([key,value])=>({
+
+name:
+translateError(key),
+
+value
+
+}));
+
+
+},[statistics]);
+
+
+
+
+
+
+
+if(loading){
+
+
+return (
+
+<div className="loading">
+
+Đang tải dữ liệu...
+
+</div>
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+return (
 
 <div className="dashboard">
 
 
 
-
-
-
-{/* ==========================
-HEADER
-========================== */}
-
-
 <h1>
-
 Vietnamese ASR Error Analyzer
-
 </h1>
-
 
 
 <p className="subtitle">
 
-Whisper Vietnamese Speech Recognition Evaluation Dashboard
+Whisper Vietnamese Speech Recognition Dashboard
 
 </p>
 
@@ -398,122 +771,32 @@ Whisper Vietnamese Speech Recognition Evaluation Dashboard
 
 
 
-
-
-
-
-{/* ==========================
-CARDS
-========================== */}
-
-
-
 <div className="cards">
 
 
+<StatCard
 
-<div className="card">
+title="Tổng Audio"
 
+value={
+statistics.total_audio
+}
 
-<h3>
+/>
 
-Tổng Audio
 
-</h3>
 
+<StatCard
 
-<strong>
+title="Tổng lỗi"
 
-{totalAudio}
+value={
+statistics.total_error
+}
 
-</strong>
+className="red"
 
-
-</div>
-
-
-
-
-
-
-
-<div className="card">
-
-
-<h3>
-
-Nhận dạng đúng
-
-</h3>
-
-
-<strong className="green">
-
-{correct}
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div className="card">
-
-
-<h3>
-
-Có lỗi
-
-</h3>
-
-
-<strong className="red">
-
-{wrong}
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div className="card">
-
-
-<h3>
-
-WER / CER
-
-</h3>
-
-
-<strong>
-
-
-{werAverage.toFixed(2)}%
-
-/
-
-{cerAverage.toFixed(2)}%
-
-
-</strong>
-
-
-</div>
-
-
-
+/>
 
 
 
@@ -523,13 +806,6 @@ WER / CER
 
 
 
-
-
-
-
-{/* ==========================
-CHART
-========================== */}
 
 
 
@@ -537,17 +813,11 @@ CHART
 
 
 <h2>
-
-Phân bố lỗi tiếng Việt
-
+Phân bố lỗi
 </h2>
 
 
-
-
-
 <div className="chart-box">
-
 
 
 <ResponsiveContainer
@@ -559,39 +829,19 @@ height="100%"
 >
 
 
-
-<BarChart
-
-data={chartData}
-
->
+<BarChart data={chartData}>
 
 
-
-<XAxis
-
-dataKey="name"
-
-/>
+<XAxis dataKey="name"/>
 
 
-
-<YAxis />
-
+<YAxis/>
 
 
-<Tooltip />
+<Tooltip/>
 
 
-
-<Bar
-
-dataKey="value"
-
-fill="#2563eb"
-
-/>
-
+<Bar dataKey="value"/>
 
 
 </BarChart>
@@ -602,24 +852,16 @@ fill="#2563eb"
 
 
 
+</div>
+
 
 </div>
 
 
 
-</div>
 
 
 
-
-
-
-
-
-
-{/* ==========================
-TABLE
-========================== */}
 
 
 
@@ -627,13 +869,24 @@ TABLE
 
 
 <h2>
-
-Phân tích từng Audio
-
+Danh sách Audio
 </h2>
 
 
 
+<input
+
+className="search"
+
+placeholder="Tìm audio..."
+
+value={search}
+
+onChange={
+e=>setSearch(e.target.value)
+}
+
+/>
 
 
 
@@ -641,80 +894,22 @@ Phân tích từng Audio
 <div className="filter">
 
 
-
-<button
-
-onClick={()=>setFilter("all")}
-
->
-
+<button onClick={()=>setFilter("all")}>
 Tất cả
-
 </button>
 
 
-
-
-
-<button
-
-onClick={()=>setFilter("wrong")}
-
->
-
-Chỉ lỗi
-
+<button onClick={()=>setFilter("incorrect")}>
+Có lỗi
 </button>
 
 
-
-
-
-<button
-
-onClick={()=>setFilter("correct")}
-
->
-
-Chính xác
-
+<button onClick={()=>setFilter("correct")}>
+Đúng
 </button>
-
 
 
 </div>
-
-
-
-
-
-
-
-<input
-
-
-className="search"
-
-
-placeholder="Tìm kiếm câu nhận dạng..."
-
-
-value={search}
-
-
-onChange={
-
-e=>
-
-setSearch(e.target.value)
-
-}
-
-
-/>
-
-
-
 
 
 
@@ -726,64 +921,27 @@ setSearch(e.target.value)
 
 <thead>
 
-
 <tr>
 
-
 <th>
-
 Audio
-
 </th>
 
-
-
 <th>
-
-Câu chuẩn
-
-</th>
-
-
-
-<th>
-
-Whisper
-
-</th>
-
-
-
-<th>
-
 WER
-
 </th>
 
-
-
 <th>
-
 CER
-
 </th>
 
-
-
 <th>
-
 Trạng thái
-
 </th>
-
-
 
 <th>
-
 Lỗi
-
 </th>
-
 
 </tr>
 
@@ -794,64 +952,47 @@ Lỗi
 
 
 
-
-
-
 <tbody>
-
 
 
 {
 
-tableData.map(
-
-(item,index)=>(
+tableData.map(item=>(
 
 
 <tr
 
+key={item.audio}
 
-key={index}
-
-
-className="click-row"
-
-
-onClick={()=>setSelectedAudio(item)}
-
+onClick={
+()=>openDetail(item.audio)
+}
 
 >
 
 
-
 <td>
-
 {item.audio}
-
 </td>
 
 
+<td>
+{formatPercent(item.wer)}
+</td>
 
+
+<td>
+{formatPercent(item.cer)}
+</td>
 
 
 <td>
 
-{item.ground_truth}
+{
+STATUS_LABEL[getStatus(item)]
+}
 
 </td>
-
-
-
-
-
-<td>
-
-{item.prediction}
-
-</td>
-
-
-
 
 
 
@@ -859,118 +1000,11 @@ onClick={()=>setSelectedAudio(item)}
 
 
 {
+item.errors?.map(
 
-(item.wer*100)
-
-.toFixed(2)
-
-}%
-
-</td>
-
-
-
-
-
-
-<td>
-
-
-{
-
-(item.cer*100)
-
-.toFixed(2)
-
-}%
-
-</td>
-
-
-
-
-
-
-<td>
-
+(e,i)=>(
 
 <span
-
-
-className={
-
-item.status==="Đúng"
-
-?
-
-"status-good"
-
-:
-
-"status-bad"
-
-}
-
-
->
-
-
-{
-
-item.status==="Đúng"
-
-?
-
-"✓ Đúng"
-
-:
-
-"✗ Sai"
-
-}
-
-
-</span>
-
-
-</td>
-
-
-
-
-
-
-
-<td>
-
-
-
-{
-
-
-item.errors.length===0
-
-
-?
-
-
-<span className="success">
-
-Không lỗi
-
-</span>
-
-
-
-:
-
-
-item.errors.map(
-
-(error,i)=>(
-
-
-<div
 
 key={i}
 
@@ -978,664 +1012,55 @@ className="error-badge"
 
 >
 
-{translateError(error)}
+{translateError(e)}
 
-</div>
-
-
-)
-
+</span>
 
 )
 
-
+)
 
 }
-
-
 
 
 
 </td>
 
 
-
-
-
-
 </tr>
 
 
-)
-
-
-)
-
+))
 
 }
-
-
 
 
 </tbody>
 
 
-
-
 </table>
 
 
-
-
-
 </div>
 
 
 
 
-
-
-// ==========================
-// MODAL DETAIL
-// ==========================
-
-
-{
-
-selectedAudio && (
-
-
-<div className="modal-overlay">
-
-
-
-<div className="modal">
-
-
-
-
-
-<button
-
-
-className="close-btn"
-
-
-onClick={()=>setSelectedAudio(null)}
-
-
->
-
-×
-
-</button>
-
-
-
-
-
-
-
-<h2>
-
-Chi tiết phân tích Audio
-
-</h2>
-
-
-
-
-
-
-
-<h3>
-
-Tên file
-
-</h3>
-
-
-<p>
-
-{selectedAudio.audio}
-
-</p>
-
-
-
-
-
-
-
-
-<h3>
-
-Câu chuẩn
-
-</h3>
-
-
-<p className="text-box">
-
-{selectedAudio.ground_truth}
-
-</p>
-
-
-
-
-
-
-
-
-<h3>
-
-Whisper nhận dạng
-
-</h3>
-
-
-<p className="text-box">
-
-{selectedAudio.prediction}
-
-</p>
-
-
-
-
-
-
-
-
-
-<div className="score-box">
-
-
-
-<div>
-
-
-<h4>
-
-WER
-
-</h4>
-
-
-<strong>
-
-{
-
-(selectedAudio.wer*100)
-
-.toFixed(2)
-
-}%
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div>
-
-
-<h4>
-
-CER
-
-</h4>
-
-
-<strong>
-
-{
-
-(selectedAudio.cer*100)
-
-.toFixed(2)
-
-}%
-
-</strong>
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<h3>
-Phân loại lỗi
-</h3>
-
-
-{
-selectedAudio.errors.length===0
-
-?
-
-<span className="success">
-
-Không có lỗi
-
-</span>
-
-
-:
-
-selectedAudio.errors.map(
-
-(error,index)=>(
-
-
-<span
-
-key={index}
-
-className="error-badge"
-
->
-
-{translateError(error)}
-
-</span>
-
-
-)
-
-)
-
-}
-
-
-
-
-
-{/* =========================
-    WORD ANALYSIS DETAIL
-========================= */}
-
-
-{
-
-selectedAudio.word_analysis &&
-
-selectedAudio.word_analysis.length > 0 &&
-
-(
-
-
-<div className="word-analysis">
-
-
-<h3>
-
-Chi tiết lỗi phát âm
-
-</h3>
 
 
 
 {
+selected &&
 
+<DetailModal
 
-selectedAudio.word_analysis.map(
+data={selected}
 
-(item,index)=>(
-
-
-<div
-
-key={index}
-
-className="word-card"
-
->
-
-
-
-<h4>
-
-{item.reference}
-
-&nbsp; → &nbsp;
-
-{item.prediction}
-
-</h4>
-
-
-
-
-
-<div className="phoneme-row">
-
-
-<span>
-
-Âm đầu:
-
-</span>
-
-
-<span>
-
-{item.detail.initial.reference}
-
-→
-
-{item.detail.initial.prediction}
-
-</span>
-
-
-
-<span
-
-className={
-
-item.detail.initial.correct
-
-?
-
-"correct"
-
-:
-
-"incorrect"
-
+onClose={
+()=>setSelected(null)
 }
 
->
-
-{
-
-item.detail.initial.correct
-
-?
-
-"✓ Đúng"
-
-:
-
-"✗ Sai"
-
-}
-
-</span>
-
-
-</div>
-
-
-
-
-
-
-
-<div className="phoneme-row">
-
-
-<span>
-
-Âm chính:
-
-</span>
-
-
-<span>
-
-{item.detail.nucleus.reference}
-
-→
-
-{item.detail.nucleus.prediction}
-
-</span>
-
-
-
-<span
-
-className={
-
-item.detail.nucleus.correct
-
-?
-
-"correct"
-
-:
-
-"incorrect"
-
-}
-
->
-
-{
-
-item.detail.nucleus.correct
-
-?
-
-"✓ Đúng"
-
-:
-
-"✗ Sai"
-
-}
-
-</span>
-
-
-</div>
-
-
-
-
-
-
-
-<div className="phoneme-row">
-
-
-<span>
-
-Âm cuối:
-
-</span>
-
-
-<span>
-
-{
-
-item.detail.final.reference || "-"
-
-}
-
-→
-
-{
-
-item.detail.final.prediction || "-"
-
-}
-
-</span>
-
-
-
-<span
-
-className={
-
-item.detail.final.correct
-
-?
-
-"correct"
-
-:
-
-"incorrect"
-
-}
-
->
-
-{
-
-item.detail.final.correct
-
-?
-
-"✓ Đúng"
-
-:
-
-"✗ Sai"
-
-}
-
-</span>
-
-
-</div>
-
-
-
-
-
-
-
-<div className="phoneme-row">
-
-
-<span>
-
-Thanh điệu:
-
-</span>
-
-
-<span>
-
-{item.detail.tone.reference}
-
-→
-
-{item.detail.tone.prediction}
-
-</span>
-
-
-
-<span
-
-className={
-
-item.detail.tone.correct
-
-?
-
-"correct"
-
-:
-
-"incorrect"
-
-}
-
->
-
-{
-
-item.detail.tone.correct
-
-?
-
-"✓ Đúng"
-
-:
-
-"✗ Sai"
-
-}
-
-</span>
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-)
-
-)
-
-
-}
-
-
-</div>
-
-
-)
-
-
-}
-
-
-
-
-
-<div className="analysis-status">
-
-
-{
-
-
-selectedAudio.status==="Đúng"
-
-
-?
-
-
-"✓ Nhận dạng chính xác"
-
-
-:
-
-
-"✗ Cần cải thiện"
-
-
+/>
 
 }
 
@@ -1643,42 +1068,7 @@ selectedAudio.status==="Đúng"
 
 </div>
 
-
-
-
-
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-)
-
+);
 
 
 }
-
-
-
-
-
-
-
-</div>
-
-
-
-  );
-
-
-}
-
-
-
-export default App;

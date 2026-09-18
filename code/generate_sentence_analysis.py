@@ -1,18 +1,31 @@
 # -*- coding: utf-8 -*-
 
-# =====================================================
-# generate_sentence_analysis.py
-# Vietnamese ASR Sentence Analysis V10.5
-# Normalize + Alignment + Phoneme Error
-# =====================================================
+"""
+generate_sentence_analysis.py
+Vietnamese ASR Sentence Analysis V13.2 FINAL
+
+CSV
+ |
+word_alignment
+ |
+simple_error_check
+ |
+analyze_sentence_phoneme
+ |
+sentence_analysis.json
+"""
+
+
+import argparse
+import json
+import logging
+import sys
+import unicodedata
+from pathlib import Path
 
 
 import pandas as pd
-import json
-import sys
-import re
-import unicodedata
-
+from tqdm import tqdm
 
 
 
@@ -21,37 +34,36 @@ import unicodedata
 # =====================================================
 
 
-sys.path.append(
-    r"E:\ASR_Project\web\backend"
+ROOT = Path(__file__).resolve().parent
+
+
+sys.path.insert(
+
+    0,
+
+    str(
+
+        ROOT.parent /
+
+        "web" /
+
+        "backend"
+
+    )
+
 )
+
 
 
 from audio_analyzer import (
-    analyze_sentence_phoneme
-)
 
+    word_alignment,
 
+    simple_error_check,
 
+    analyze_sentence_phoneme,
 
-
-
-
-# =====================================================
-# FILE PATH
-# =====================================================
-
-
-ASR_FILE = (
-
-    r"E:\ASR_Project\dataset\asr_results.csv"
-
-)
-
-
-
-OUTPUT_FILE = (
-
-    r"E:\ASR_Project\dataset\sentence_analysis.json"
+    calculate_score
 
 )
 
@@ -59,58 +71,48 @@ OUTPUT_FILE = (
 
 
 
+log = logging.getLogger(__name__)
+
+
+
+
+REQUIRED_COLUMNS = {
+
+    "audio",
+
+    "ground_truth",
+
+    "prediction"
+
+}
+
+
+
+
+
 
 
 # =====================================================
-# TEXT NORMALIZATION
+# NORMALIZE
 # =====================================================
 
 
-def normalize_text(text):
+def normalize(text):
 
 
-    text = unicodedata.normalize(
+    if text is None:
+
+        return ""
+
+
+
+    return unicodedata.normalize(
 
         "NFC",
 
         str(text)
 
-    )
-
-
-    text = text.lower()
-
-
-
-    # bỏ dấu câu
-
-    text = re.sub(
-
-        r"[^\w\sà-ỹđ]",
-
-        "",
-
-        text
-
-    )
-
-
-
-    # bỏ khoảng trắng thừa
-
-    text = re.sub(
-
-        r"\s+",
-
-        " ",
-
-        text
-
-    )
-
-
-
-    return text.strip()
+    ).strip()
 
 
 
@@ -119,182 +121,56 @@ def normalize_text(text):
 
 
 # =====================================================
-# LOAD DATA
+# ANALYZE ONE ROW
 # =====================================================
 
 
-print(
-    "Loading dataset..."
-)
+def analyze_row(row):
 
 
+    audio = normalize(
 
+        row.get(
 
-df_asr = pd.read_csv(
-
-    ASR_FILE,
-
-    encoding="utf-8-sig"
-
-)
-
-
-
-print(
-
-    "ASR samples:",
-
-    len(df_asr)
-
-)
-
-
-
-
-
-
-
-# =====================================================
-# CREATE ANALYSIS
-# =====================================================
-
-
-result = []
-
-
-
-
-
-for index,row in df_asr.iterrows():
-
-
-
-    audio = row["audio"]
-
-
-
-
-    reference = normalize_text(
-
-        row["ground_truth"]
-
-    )
-
-
-
-    prediction = normalize_text(
-
-        row["prediction"]
-
-    )
-
-
-
-
-
-
-    # =====================================
-    # PHONEME ANALYSIS
-    # =====================================
-
-
-
-    try:
-
-
-        word_analysis = analyze_sentence_phoneme(
-
-            reference,
-
-            prediction
+            "audio"
 
         )
 
+    )
 
 
-    except Exception as e:
 
+    reference = normalize(
 
-        print(
+        row.get(
 
-            "Analysis error:",
-
-            audio,
-
-            e
+            "ground_truth"
 
         )
 
-
-        word_analysis = []
-
+    )
 
 
 
+    prediction = normalize(
 
+        row.get(
 
-    # =====================================
-    # COLLECT ERROR
-    # =====================================
+            "prediction"
 
-
-
-    errors = []
-
-
-
-    for item in word_analysis:
-
-
-        for err in item.get(
-
-            "errors",
-
-            []
-
-        ):
-
-
-            errors.append(err)
-
-
-
-
-
-    errors = list(set(errors))
-
-
-
-
-
-
-    status = (
-
-        "Đúng"
-
-        if len(errors)==0
-
-        else
-
-        "Sai"
+        )
 
     )
 
 
 
 
-
-
-
-
-    item = {
-
+    result = {
 
 
         "audio":
 
         audio,
-
 
 
 
@@ -304,61 +180,200 @@ for index,row in df_asr.iterrows():
 
 
 
-
         "prediction":
 
         prediction,
 
 
 
+        "analysis_failed":
 
-        "wer":
-
-        float(
-
-            row["wer"]
-
-        ),
-
-
-
-
-        "cer":
-
-        float(
-
-            row["cer"]
-
-        ),
-
-
-
-
-        "status":
-
-        status,
-
-
-
-
-        "errors":
-
-        errors,
-
-
-
-
-        "word_analysis":
-
-        word_analysis
-
-
+        False
 
     }
 
 
 
-    result.append(item)
+
+
+    try:
+
+
+        # =========================
+        # ALIGNMENT ONLY ONE TIME
+        # =========================
+
+
+        alignment = word_alignment(
+
+            reference,
+
+            prediction
+
+        )
+
+
+
+
+        errors = simple_error_check(
+
+            alignment
+
+        )
+
+
+
+
+        word_analysis = analyze_sentence_phoneme(
+
+            alignment
+
+        )
+
+
+
+
+        score = calculate_score(
+
+            reference,
+
+            prediction
+
+        )
+
+
+
+
+
+        result.update({
+
+
+            "wer":
+
+            score["wer"],
+
+
+
+            "cer":
+
+            score["cer"],
+
+
+
+            "status":
+
+            (
+
+                "Đúng"
+
+                if len(errors)==0
+
+                else
+
+                "Sai"
+
+            ),
+
+
+
+            "errors":
+
+            errors,
+
+
+
+            "alignment":
+
+            alignment,
+
+
+
+            "word_analysis":
+
+            word_analysis
+
+
+        })
+
+
+
+
+
+    except Exception as e:
+
+
+
+        log.exception(
+
+            "Analysis failed: %s",
+
+            audio
+
+        )
+
+
+
+        result.update({
+
+
+            "analysis_failed":
+
+            True,
+
+
+
+            "analysis_error":
+
+            str(e),
+
+
+
+            "status":
+
+            "Lỗi phân tích",
+
+
+
+            "errors":
+
+            [
+
+                "analysis_failed"
+
+            ],
+
+
+
+            "alignment":
+
+            [],
+
+
+
+            "word_analysis":
+
+            [],
+
+
+
+            "wer":
+
+            None,
+
+
+
+            "cer":
+
+            None
+
+
+        })
+
+
+
+
+
+    return result
 
 
 
@@ -367,55 +382,88 @@ for index,row in df_asr.iterrows():
 
 
 # =====================================================
-# SAVE JSON
+# MAIN
 # =====================================================
 
 
-
-output = {
-
-
-
-    "total_audio":
-
-    len(result),
+def main():
 
 
 
-    "data":
+    logging.basicConfig(
 
-    result
+        level=logging.INFO
 
-
-
-}
+    )
 
 
 
+    parser = argparse.ArgumentParser()
 
 
 
-with open(
+    parser.add_argument(
 
-    OUTPUT_FILE,
+        "--input",
 
-    "w",
+        type=Path,
 
-    encoding="utf-8"
+        default=
 
-) as f:
+        ROOT.parent /
+
+        "dataset" /
+
+        "asr_results.csv"
+
+    )
 
 
 
-    json.dump(
 
-        output,
+    parser.add_argument(
 
-        f,
+        "--output",
 
-        ensure_ascii=False,
+        type=Path,
 
-        indent=2
+        default=
+
+        ROOT.parent /
+
+        "dataset" /
+
+        "sentence_analysis.json"
+
+    )
+
+
+
+    args = parser.parse_args()
+
+
+
+
+
+    print(
+
+        "Loading dataset..."
+
+    )
+
+
+
+
+
+    df = pd.read_csv(
+
+        args.input,
+
+        encoding="utf-8-sig",
+
+        dtype=str,
+
+        keep_default_na=False
 
     )
 
@@ -425,25 +473,200 @@ with open(
 
 
 
-print("==========================")
+    missing = (
 
-print("DONE")
+        REQUIRED_COLUMNS
 
-print(
+        -
 
-    "Total:",
+        set(df.columns)
 
-    len(result)
-
-)
+    )
 
 
-print(
 
-    "Saved:",
+    if missing:
 
-    OUTPUT_FILE
 
-)
+        raise ValueError(
 
-print("==========================")
+            f"Missing columns: {missing}"
+
+        )
+
+
+
+
+
+
+
+    print(
+
+        "ASR samples:",
+
+        len(df)
+
+    )
+
+
+
+
+
+
+
+    results=[]
+
+
+
+    for row in tqdm(
+
+        df.to_dict("records"),
+
+        total=len(df)
+
+    ):
+
+
+
+        results.append(
+
+            analyze_row(row)
+
+        )
+
+
+
+
+
+
+
+    failed = sum(
+
+        1
+
+        for x in results
+
+        if x["analysis_failed"]
+
+    )
+
+
+
+
+
+
+
+    output = {
+
+
+        "total_audio":
+
+        len(results),
+
+
+
+        "analysis_failed":
+
+        failed,
+
+
+
+        "data":
+
+        results
+
+
+    }
+
+
+
+
+
+
+    args.output.parent.mkdir(
+
+        parents=True,
+
+        exist_ok=True
+
+    )
+
+
+
+
+
+    with open(
+
+        args.output,
+
+        "w",
+
+        encoding="utf-8"
+
+    ) as f:
+
+
+        json.dump(
+
+            output,
+
+            f,
+
+            ensure_ascii=False,
+
+            indent=2
+
+        )
+
+
+
+
+
+
+
+    print("==========================")
+
+    print(
+
+        "DONE"
+
+    )
+
+
+    print(
+
+        "Total:",
+
+        len(results)
+
+    )
+
+
+    print(
+
+        "Failed:",
+
+        failed
+
+    )
+
+
+    print(
+
+        "Saved:",
+
+        args.output
+
+    )
+
+
+    print("==========================")
+
+
+
+
+
+
+if __name__ == "__main__":
+
+    main()

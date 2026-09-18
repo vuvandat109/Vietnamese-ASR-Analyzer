@@ -1,9 +1,19 @@
+# -*- coding: utf-8 -*-
+
+# =====================================================
+# main.py
+# Vietnamese ASR Analyzer API V10.6.1
+# FastAPI + React Dashboard Compatible
+# =====================================================
+
+
 from fastapi import (
     FastAPI,
     UploadFile,
     File,
     Form
 )
+
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,24 +28,27 @@ import uuid
 
 from whisper_engine import transcribe_audio
 
+
 from audio_analyzer import (
     calculate_score,
-    simple_error_check
+    simple_error_check,
+    analyze_sentence_phoneme
 )
 
 
 
 
 
-# =====================================
-# FASTAPI
-# =====================================
+# =====================================================
+# APP
+# =====================================================
+
 
 app = FastAPI(
 
     title="Vietnamese ASR Analyzer API",
 
-    version="6.0"
+    version="10.6.1"
 
 )
 
@@ -43,9 +56,12 @@ app = FastAPI(
 
 
 
-# =====================================
+
+
+# =====================================================
 # CORS
-# =====================================
+# =====================================================
+
 
 app.add_middleware(
 
@@ -76,17 +92,16 @@ app.add_middleware(
 
 
 
-# =====================================
+
+# =====================================================
 # PATH
-# =====================================
+# =====================================================
 
 
 BASE_DIR = r"E:\ASR_Project\dataset"
 
 
-UPLOAD_DIR = (
-    r"E:\ASR_Project\web\backend\uploads"
-)
+UPLOAD_DIR = r"E:\ASR_Project\web\backend\uploads"
 
 
 
@@ -120,9 +135,17 @@ ANALYSIS_FILE = os.path.join(
 
 
 
+STATISTICS_FILE = os.path.join(
+
+    BASE_DIR,
+
+    "error_statistics.json"
+
+)
 
 
-# tạo thư mục upload nếu chưa có
+
+
 
 os.makedirs(
 
@@ -139,15 +162,15 @@ os.makedirs(
 
 
 
-# =====================================
+
+# =====================================================
 # HOME
-# =====================================
+# =====================================================
 
 
 @app.get("/")
 
 def home():
-
 
     return {
 
@@ -164,14 +187,67 @@ def home():
 
 
 
-# =====================================
-# REPORT
-# =====================================
+
+# =====================================================
+# HEALTH
+# =====================================================
+
+
+@app.get("/health")
+
+def health():
+
+    return {
+
+
+        "status":
+
+        "OK",
+
+
+        "report":
+
+        os.path.exists(REPORT_FILE),
+
+
+        "errors":
+
+        os.path.exists(ERROR_FILE),
+
+
+        "analysis":
+
+        os.path.exists(ANALYSIS_FILE),
+
+
+        "statistics":
+
+        os.path.exists(STATISTICS_FILE),
+
+
+        "whisper":
+
+        True
+
+    }
+
+
+
+
+
+
+
+
+
+# =====================================================
+# OLD REPORT API
+# React đang dùng
+# =====================================================
 
 
 @app.get("/report")
 
-def get_report():
+def report():
 
 
     if not os.path.exists(REPORT_FILE):
@@ -206,14 +282,15 @@ def get_report():
 
 
 
-# =====================================
-# ERROR DETAIL
-# =====================================
+
+# =====================================================
+# OLD ERROR API
+# =====================================================
 
 
 @app.get("/errors")
 
-def get_errors():
+def errors():
 
 
     if not os.path.exists(ERROR_FILE):
@@ -238,54 +315,60 @@ def get_errors():
 
 
 
-    df = df.fillna("")
+    df=df.fillna("")
 
 
 
-    result = []
+    result=[]
 
 
 
-    for _, row in df.iterrows():
-
+    for _,row in df.iterrows():
 
         result.append({
-
 
             "audio":
 
             row.get(
-                "audio",
-                ""
-            ),
 
+                "audio",
+
+                ""
+
+            ),
 
 
             "reference":
 
             row.get(
+
                 "reference_word",
+
                 ""
+
             ),
 
 
-
-            "hypothesis":
+            "prediction":
 
             row.get(
-                "hypothesis_word",
-                ""
-            ),
 
+                "hypothesis_word",
+
+                ""
+
+            ),
 
 
             "error_type":
 
             row.get(
-                "error_type",
-                ""
-            )
 
+                "error_type",
+
+                ""
+
+            )
 
         })
 
@@ -299,11 +382,9 @@ def get_errors():
         len(result),
 
 
-
         "data":
 
         result
-
 
     }
 
@@ -315,14 +396,14 @@ def get_errors():
 
 
 
-# =====================================
-# SENTENCE ANALYSIS
-# =====================================
+# =====================================================
+# OLD ANALYSIS API
+# =====================================================
 
 
 @app.get("/analysis")
 
-def sentence_analysis():
+def analysis():
 
 
     if not os.path.exists(ANALYSIS_FILE):
@@ -358,43 +439,105 @@ def sentence_analysis():
 
 
 
+# =====================================================
+# NEW STATISTICS API
+# =====================================================
 
-# =====================================
-# HEALTH CHECK
-# =====================================
+
+@app.get("/api/statistics")
+
+def statistics():
 
 
-@app.get("/health")
+    with open(
 
-def health():
+        STATISTICS_FILE,
+
+        "r",
+
+        encoding="utf-8"
+
+    ) as f:
+
+
+        return json.load(f)
+
+
+
+
+
+
+
+
+
+# =====================================================
+# AUDIO LIST
+# =====================================================
+
+
+@app.get("/api/audio-list")
+
+def audio_list():
+
+
+    with open(
+
+        ANALYSIS_FILE,
+
+        "r",
+
+        encoding="utf-8"
+
+    ) as f:
+
+
+        data=json.load(f)
+
+
+
+    result=[]
+
+
+
+    for item in data["data"]:
+
+
+        result.append({
+
+            "audio":
+
+            item["audio"],
+
+
+            "wer":
+
+            item["wer"],
+
+
+            "cer":
+
+            item["cer"],
+
+
+            "status":
+
+            item["status"]
+
+        })
+
 
 
     return {
 
 
-        "status":
+        "total":
 
-        "OK",
-
-
-        "report":
-
-        os.path.exists(REPORT_FILE),
+        len(result),
 
 
-        "errors":
+        "data":
 
-        os.path.exists(ERROR_FILE),
-
-
-        "analysis":
-
-        os.path.exists(ANALYSIS_FILE),
-
-
-        "whisper":
-
-        True
+        result
 
     }
 
@@ -406,26 +549,72 @@ def health():
 
 
 
-# =====================================
-# V6 UPLOAD AUDIO ANALYZE
-# =====================================
+# =====================================================
+# AUDIO DETAIL
+# =====================================================
+
+
+@app.get("/api/audio-detail/{audio}")
+
+def audio_detail(audio:str):
+
+
+    with open(
+
+        ANALYSIS_FILE,
+
+        "r",
+
+        encoding="utf-8"
+
+    ) as f:
+
+
+        data=json.load(f)
+
+
+
+    for item in data["data"]:
+
+
+        if item["audio"] == audio:
+
+
+            return item
+
+
+
+    return {
+
+
+        "error":
+
+        "Không tìm thấy audio"
+
+    }
+
+
+
+
+
+
+
+
+
+# =====================================================
+# UPLOAD ANALYZE
+# =====================================================
 
 
 @app.post("/upload-analyze")
 
 async def upload_analyze(
 
+    audio:UploadFile = File(...),
 
-    audio: UploadFile = File(...),
-
-
-    reference: str = Form(...)
-
+    reference:str = Form(...)
 
 ):
-
-
-    # tạo tên file
 
 
     filename = (
@@ -444,7 +633,7 @@ async def upload_analyze(
 
 
 
-    save_path = os.path.join(
+    path=os.path.join(
 
         UPLOAD_DIR,
 
@@ -455,23 +644,21 @@ async def upload_analyze(
 
 
 
-    # lưu audio
-
 
     with open(
 
-        save_path,
+        path,
 
         "wb"
 
-    ) as buffer:
+    ) as f:
 
 
         shutil.copyfileobj(
 
             audio.file,
 
-            buffer
+            f
 
         )
 
@@ -479,23 +666,11 @@ async def upload_analyze(
 
 
 
-    # Whisper nhận dạng
-
-
-    prediction = transcribe_audio(
-
-        save_path
-
-    )
+    prediction=transcribe_audio(path)
 
 
 
-
-
-    # WER CER
-
-
-    score = calculate_score(
+    score=calculate_score(
 
         reference,
 
@@ -505,12 +680,7 @@ async def upload_analyze(
 
 
 
-
-
-    # lỗi
-
-
-    errors = simple_error_check(
+    errors=simple_error_check(
 
         reference,
 
@@ -520,11 +690,17 @@ async def upload_analyze(
 
 
 
+    word_analysis=analyze_sentence_phoneme(
+
+        reference,
+
+        prediction
+
+    )
 
 
 
     return {
-
 
 
         "audio":
@@ -532,11 +708,9 @@ async def upload_analyze(
         audio.filename,
 
 
-
         "ground_truth":
 
         reference,
-
 
 
         "prediction":
@@ -544,17 +718,14 @@ async def upload_analyze(
         prediction,
 
 
-
         "wer":
 
         score["wer"],
 
 
-
         "cer":
 
         score["cer"],
-
 
 
         "status":
@@ -572,10 +743,42 @@ async def upload_analyze(
         ),
 
 
-
         "errors":
 
-        errors
+        errors,
 
+
+        "word_analysis":
+
+        word_analysis
 
     }
+
+
+
+
+
+
+
+
+
+# =====================================================
+# START SERVER
+# =====================================================
+
+
+if __name__ == "__main__":
+
+
+    import uvicorn
+
+
+    uvicorn.run(
+
+        app,
+
+        host="127.0.0.1",
+
+        port=8000
+
+    )

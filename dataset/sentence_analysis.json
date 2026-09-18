@@ -1,18 +1,100 @@
 {
   "total_audio": 20,
+  "analysis_failed": 0,
   "data": [
     {
       "audio": "common_voice_vi_24358794.mp3",
-      "ground_truth": "mày mà chạy nữa tao thề không chơi với mày nữa đâu",
-      "prediction": "mày mà chảy nữa tao thấy không chơi với mày nữa đâu",
-      "wer": 0.1666666666666666,
+      "ground_truth": "Mày mà chạy nữa tao thề không chơi với mày nữa đâu",
+      "prediction": "Mày mà chảy nữa, tao thấy không chơi với mày nữa đâu.",
+      "analysis_failed": false,
+      "wer": 0.1667,
       "cer": 0.06,
       "status": "Sai",
       "errors": [
         "tone_error",
         "nucleus_error"
       ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "mày",
+          "prediction": "mày"
+        },
+        {
+          "type": "equal",
+          "reference": "mà",
+          "prediction": "mà"
+        },
+        {
+          "type": "substitution",
+          "reference": "chạy",
+          "prediction": "chảy"
+        },
+        {
+          "type": "equal",
+          "reference": "nữa",
+          "prediction": "nữa"
+        },
+        {
+          "type": "equal",
+          "reference": "tao",
+          "prediction": "tao"
+        },
+        {
+          "type": "substitution",
+          "reference": "thề",
+          "prediction": "thấy"
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không"
+        },
+        {
+          "type": "equal",
+          "reference": "chơi",
+          "prediction": "chơi"
+        },
+        {
+          "type": "equal",
+          "reference": "với",
+          "prediction": "với"
+        },
+        {
+          "type": "equal",
+          "reference": "mày",
+          "prediction": "mày"
+        },
+        {
+          "type": "equal",
+          "reference": "nữa",
+          "prediction": "nữa"
+        },
+        {
+          "type": "equal",
+          "reference": "đâu",
+          "prediction": "đâu"
+        }
+      ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "mày",
+          "prediction": "mày",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "mà",
+          "prediction": "mà",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "chạy",
@@ -46,6 +128,24 @@
           }
         },
         {
+          "type": "equal",
+          "reference": "nữa",
+          "prediction": "nữa",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "tao",
+          "prediction": "tao",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
           "type": "substitution",
           "reference": "thề",
           "prediction": "thấy",
@@ -77,21 +177,186 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "chơi",
+          "prediction": "chơi",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "với",
+          "prediction": "với",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "mày",
+          "prediction": "mày",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "nữa",
+          "prediction": "nữa",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "đâu",
+          "prediction": "đâu",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_24362782.mp3",
       "ground_truth": "vì giữa đường không bắt được xe ôm khác",
-      "prediction": "vì giữa đường không bắt được xe ơn khác",
-      "wer": 0.1111111111111111,
-      "cer": 0.0512820512820512,
+      "prediction": "Vì giữa đường không bắt được xe ơn khác?",
+      "analysis_failed": false,
+      "wer": 0.1111,
+      "cer": 0.0513,
       "status": "Sai",
       "errors": [
         "nucleus_error",
         "final_consonant_error"
       ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "vì",
+          "prediction": "vì"
+        },
+        {
+          "type": "equal",
+          "reference": "giữa",
+          "prediction": "giữa"
+        },
+        {
+          "type": "equal",
+          "reference": "đường",
+          "prediction": "đường"
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không"
+        },
+        {
+          "type": "equal",
+          "reference": "bắt",
+          "prediction": "bắt"
+        },
+        {
+          "type": "equal",
+          "reference": "được",
+          "prediction": "được"
+        },
+        {
+          "type": "equal",
+          "reference": "xe",
+          "prediction": "xe"
+        },
+        {
+          "type": "substitution",
+          "reference": "ôm",
+          "prediction": "ơn"
+        },
+        {
+          "type": "equal",
+          "reference": "khác",
+          "prediction": "khác"
+        }
+      ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "vì",
+          "prediction": "vì",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "giữa",
+          "prediction": "giữa",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "đường",
+          "prediction": "đường",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "bắt",
+          "prediction": "bắt",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "được",
+          "prediction": "được",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "xe",
+          "prediction": "xe",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "ôm",
@@ -124,20 +389,52 @@
               "correct": true
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "khác",
+          "prediction": "khác",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_23936355.mp3",
-      "ground_truth": "già làng liền nói",
-      "prediction": "giả lãng liệu nói",
+      "ground_truth": "Già làng liền nói",
+      "prediction": "Giả lãng liệu nói",
+      "analysis_failed": false,
       "wer": 0.75,
-      "cer": 0.2352941176470588,
+      "cer": 0.2353,
       "status": "Sai",
       "errors": [
         "tone_error",
         "nucleus_error",
         "final_consonant_error"
+      ],
+      "alignment": [
+        {
+          "type": "substitution",
+          "reference": "già",
+          "prediction": "giả"
+        },
+        {
+          "type": "substitution",
+          "reference": "làng",
+          "prediction": "lãng"
+        },
+        {
+          "type": "substitution",
+          "reference": "liền",
+          "prediction": "liệu"
+        },
+        {
+          "type": "equal",
+          "reference": "nói",
+          "prediction": "nói"
+        }
       ],
       "word_analysis": [
         {
@@ -237,22 +534,94 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "nói",
+          "prediction": "nói",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_42788631.mp3",
-      "ground_truth": "thu về cho cô không ít tiền bạc mối quan hệ tốt",
-      "prediction": "2v cho cô không ủ tiên bạc mối quan hề tốt",
-      "wer": 0.4166666666666667,
-      "cer": 0.1914893617021276,
+      "ground_truth": "Thu về cho cô không ít tiền bạc mối quan hệ tốt",
+      "prediction": "2V cho cô không ủ tiên bạc mối quan hề tốt",
+      "analysis_failed": false,
+      "wer": 0.4167,
+      "cer": 0.1915,
       "status": "Sai",
       "errors": [
-        "final_consonant_error",
-        "nucleus_error",
+        "missing_word",
         "initial_consonant_error",
+        "nucleus_error",
         "tone_error",
-        "missing_word"
+        "final_consonant_error"
+      ],
+      "alignment": [
+        {
+          "type": "missing_word",
+          "reference": "thu",
+          "prediction": ""
+        },
+        {
+          "type": "substitution",
+          "reference": "về",
+          "prediction": "2v"
+        },
+        {
+          "type": "equal",
+          "reference": "cho",
+          "prediction": "cho"
+        },
+        {
+          "type": "equal",
+          "reference": "cô",
+          "prediction": "cô"
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không"
+        },
+        {
+          "type": "substitution",
+          "reference": "ít",
+          "prediction": "ủ"
+        },
+        {
+          "type": "substitution",
+          "reference": "tiền",
+          "prediction": "tiên"
+        },
+        {
+          "type": "equal",
+          "reference": "bạc",
+          "prediction": "bạc"
+        },
+        {
+          "type": "equal",
+          "reference": "mối",
+          "prediction": "mối"
+        },
+        {
+          "type": "equal",
+          "reference": "quan",
+          "prediction": "quan"
+        },
+        {
+          "type": "substitution",
+          "reference": "hệ",
+          "prediction": "hề"
+        },
+        {
+          "type": "equal",
+          "reference": "tốt",
+          "prediction": "tốt"
+        }
       ],
       "word_analysis": [
         {
@@ -297,6 +666,33 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "cho",
+          "prediction": "cho",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "cô",
+          "prediction": "cô",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         },
         {
           "type": "substitution",
@@ -365,6 +761,33 @@
           }
         },
         {
+          "type": "equal",
+          "reference": "bạc",
+          "prediction": "bạc",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "mối",
+          "prediction": "mối",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "quan",
+          "prediction": "quan",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
           "type": "substitution",
           "reference": "hệ",
           "prediction": "hề",
@@ -395,15 +818,25 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "tốt",
+          "prediction": "tốt",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_30171307.mp3",
-      "ground_truth": "và ta tiếp chặng hành trình",
-      "prediction": "và ta biếp chẳng hình chương",
-      "wer": 0.6666666666666666,
-      "cer": 0.2962962962962963,
+      "ground_truth": "Và ta tiếp chặng hành trình",
+      "prediction": "và ta biếp chẳng hình chương.",
+      "analysis_failed": false,
+      "wer": 0.6667,
+      "cer": 0.2963,
       "status": "Sai",
       "errors": [
         "initial_consonant_error",
@@ -411,7 +844,57 @@
         "nucleus_error",
         "final_consonant_error"
       ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "và",
+          "prediction": "và"
+        },
+        {
+          "type": "equal",
+          "reference": "ta",
+          "prediction": "ta"
+        },
+        {
+          "type": "substitution",
+          "reference": "tiếp",
+          "prediction": "biếp"
+        },
+        {
+          "type": "substitution",
+          "reference": "chặng",
+          "prediction": "chẳng"
+        },
+        {
+          "type": "substitution",
+          "reference": "hành",
+          "prediction": "hình"
+        },
+        {
+          "type": "substitution",
+          "reference": "trình",
+          "prediction": "chương"
+        }
+      ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "và",
+          "prediction": "và",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "ta",
+          "prediction": "ta",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "tiếp",
@@ -547,15 +1030,73 @@
     },
     {
       "audio": "common_voice_vi_24425726.mp3",
-      "ground_truth": "chinh đứng tìm máy tính cửa gỗ đang được kéo ra",
-      "prediction": "chình đứng tìm mại tính cửa rõ đang được kéo ra",
-      "wer": 0.2727272727272727,
-      "cer": 0.1063829787234042,
+      "ground_truth": "Chinh đứng Tìm máy tính cửa gỗ đang được kéo ra",
+      "prediction": "Chình đứng tìm mại tính, cửa rõ đang được kéo ra.",
+      "analysis_failed": false,
+      "wer": 0.2727,
+      "cer": 0.1064,
       "status": "Sai",
       "errors": [
-        "initial_consonant_error",
         "tone_error",
-        "nucleus_error"
+        "nucleus_error",
+        "initial_consonant_error"
+      ],
+      "alignment": [
+        {
+          "type": "substitution",
+          "reference": "chinh",
+          "prediction": "chình"
+        },
+        {
+          "type": "equal",
+          "reference": "đứng",
+          "prediction": "đứng"
+        },
+        {
+          "type": "equal",
+          "reference": "tìm",
+          "prediction": "tìm"
+        },
+        {
+          "type": "substitution",
+          "reference": "máy",
+          "prediction": "mại"
+        },
+        {
+          "type": "equal",
+          "reference": "tính",
+          "prediction": "tính"
+        },
+        {
+          "type": "equal",
+          "reference": "cửa",
+          "prediction": "cửa"
+        },
+        {
+          "type": "substitution",
+          "reference": "gỗ",
+          "prediction": "rõ"
+        },
+        {
+          "type": "equal",
+          "reference": "đang",
+          "prediction": "đang"
+        },
+        {
+          "type": "equal",
+          "reference": "được",
+          "prediction": "được"
+        },
+        {
+          "type": "equal",
+          "reference": "kéo",
+          "prediction": "kéo"
+        },
+        {
+          "type": "equal",
+          "reference": "ra",
+          "prediction": "ra"
+        }
       ],
       "word_analysis": [
         {
@@ -591,6 +1132,24 @@
           }
         },
         {
+          "type": "equal",
+          "reference": "đứng",
+          "prediction": "đứng",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "tìm",
+          "prediction": "tìm",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
           "type": "substitution",
           "reference": "máy",
           "prediction": "mại",
@@ -624,6 +1183,24 @@
           }
         },
         {
+          "type": "equal",
+          "reference": "tính",
+          "prediction": "tính",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "cửa",
+          "prediction": "cửa",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
           "type": "substitution",
           "reference": "gỗ",
           "prediction": "rõ",
@@ -655,22 +1232,146 @@
               "correct": true
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "đang",
+          "prediction": "đang",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "được",
+          "prediction": "được",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "kéo",
+          "prediction": "kéo",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "ra",
+          "prediction": "ra",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_24124158.mp3",
-      "ground_truth": "và câu thơ đâu còn mãi ngày sau",
+      "ground_truth": "Và câu thơ đâu còn mãi ngày sau",
       "prediction": "và câu thơ đâu còn mấy ngày 6",
+      "analysis_failed": false,
       "wer": 0.25,
-      "cer": 0.1612903225806451,
+      "cer": 0.1613,
       "status": "Sai",
       "errors": [
-        "initial_consonant_error",
+        "nucleus_error",
         "tone_error",
-        "nucleus_error"
+        "initial_consonant_error"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "và",
+          "prediction": "và"
+        },
+        {
+          "type": "equal",
+          "reference": "câu",
+          "prediction": "câu"
+        },
+        {
+          "type": "equal",
+          "reference": "thơ",
+          "prediction": "thơ"
+        },
+        {
+          "type": "equal",
+          "reference": "đâu",
+          "prediction": "đâu"
+        },
+        {
+          "type": "equal",
+          "reference": "còn",
+          "prediction": "còn"
+        },
+        {
+          "type": "substitution",
+          "reference": "mãi",
+          "prediction": "mấy"
+        },
+        {
+          "type": "equal",
+          "reference": "ngày",
+          "prediction": "ngày"
+        },
+        {
+          "type": "substitution",
+          "reference": "sau",
+          "prediction": "6"
+        }
       ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "và",
+          "prediction": "và",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "câu",
+          "prediction": "câu",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "thơ",
+          "prediction": "thơ",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "đâu",
+          "prediction": "đâu",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "còn",
+          "prediction": "còn",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "mãi",
@@ -703,6 +1404,15 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "ngày",
+          "prediction": "ngày",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         },
         {
           "type": "substitution",
@@ -741,16 +1451,39 @@
     },
     {
       "audio": "common_voice_vi_24358781.mp3",
-      "ground_truth": "trên bầu trời xanh",
-      "prediction": "linh bộ trời sang",
+      "ground_truth": "Trên bầu trời xanh",
+      "prediction": "Linh Bộ Trời Sang",
+      "analysis_failed": false,
       "wer": 0.75,
-      "cer": 0.4444444444444444,
+      "cer": 0.4444,
       "status": "Sai",
       "errors": [
         "initial_consonant_error",
-        "tone_error",
         "nucleus_error",
-        "final_consonant_error"
+        "final_consonant_error",
+        "tone_error"
+      ],
+      "alignment": [
+        {
+          "type": "substitution",
+          "reference": "trên",
+          "prediction": "linh"
+        },
+        {
+          "type": "substitution",
+          "reference": "bầu",
+          "prediction": "bộ"
+        },
+        {
+          "type": "equal",
+          "reference": "trời",
+          "prediction": "trời"
+        },
+        {
+          "type": "substitution",
+          "reference": "xanh",
+          "prediction": "sang"
+        }
       ],
       "word_analysis": [
         {
@@ -821,6 +1554,15 @@
           }
         },
         {
+          "type": "equal",
+          "reference": "trời",
+          "prediction": "trời",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
           "type": "substitution",
           "reference": "xanh",
           "prediction": "sang",
@@ -857,18 +1599,98 @@
     },
     {
       "audio": "common_voice_vi_24106634.mp3",
-      "ground_truth": "khi còn sống con bé yếu kém hơn mọi người",
-      "prediction": "khi còn sống còn bé yêu cem hư mọi người",
+      "ground_truth": "Khi còn sống con bé yếu kém hơn mọi người",
+      "prediction": "Khi còn sống, còn bé yêu cem hư mọi người.",
+      "analysis_failed": false,
       "wer": 0.4,
-      "cer": 0.1463414634146341,
+      "cer": 0.1463,
       "status": "Sai",
       "errors": [
-        "initial_consonant_error",
         "tone_error",
+        "initial_consonant_error",
         "nucleus_error",
         "final_consonant_error"
       ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "khi",
+          "prediction": "khi"
+        },
+        {
+          "type": "equal",
+          "reference": "còn",
+          "prediction": "còn"
+        },
+        {
+          "type": "equal",
+          "reference": "sống",
+          "prediction": "sống"
+        },
+        {
+          "type": "substitution",
+          "reference": "con",
+          "prediction": "còn"
+        },
+        {
+          "type": "equal",
+          "reference": "bé",
+          "prediction": "bé"
+        },
+        {
+          "type": "substitution",
+          "reference": "yếu",
+          "prediction": "yêu"
+        },
+        {
+          "type": "substitution",
+          "reference": "kém",
+          "prediction": "cem"
+        },
+        {
+          "type": "substitution",
+          "reference": "hơn",
+          "prediction": "hư"
+        },
+        {
+          "type": "equal",
+          "reference": "mọi",
+          "prediction": "mọi"
+        },
+        {
+          "type": "equal",
+          "reference": "người",
+          "prediction": "người"
+        }
+      ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "khi",
+          "prediction": "khi",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "còn",
+          "prediction": "còn",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "sống",
+          "prediction": "sống",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "con",
@@ -900,6 +1722,15 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "bé",
+          "prediction": "bé",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         },
         {
           "type": "substitution",
@@ -998,22 +1829,128 @@
               "correct": true
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "mọi",
+          "prediction": "mọi",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "người",
+          "prediction": "người",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_24304405.mp3",
-      "ground_truth": "tôi ngậm cái bánh mì nhai ngấu nghiến",
-      "prediction": "tôi ngậm cái bánh mì nhà ngũ nhín",
+      "ground_truth": "Tôi ngậm cái bánh mì nhai ngấu nghiến",
+      "prediction": "Tôi ngậm cái bánh mì, nhà ngũ nhín",
+      "analysis_failed": false,
       "wer": 0.375,
-      "cer": 0.1891891891891892,
+      "cer": 0.1892,
       "status": "Sai",
       "errors": [
-        "initial_consonant_error",
+        "nucleus_error",
         "tone_error",
-        "nucleus_error"
+        "initial_consonant_error"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "tôi",
+          "prediction": "tôi"
+        },
+        {
+          "type": "equal",
+          "reference": "ngậm",
+          "prediction": "ngậm"
+        },
+        {
+          "type": "equal",
+          "reference": "cái",
+          "prediction": "cái"
+        },
+        {
+          "type": "equal",
+          "reference": "bánh",
+          "prediction": "bánh"
+        },
+        {
+          "type": "equal",
+          "reference": "mì",
+          "prediction": "mì"
+        },
+        {
+          "type": "substitution",
+          "reference": "nhai",
+          "prediction": "nhà"
+        },
+        {
+          "type": "substitution",
+          "reference": "ngấu",
+          "prediction": "ngũ"
+        },
+        {
+          "type": "substitution",
+          "reference": "nghiến",
+          "prediction": "nhín"
+        }
       ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "tôi",
+          "prediction": "tôi",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "ngậm",
+          "prediction": "ngậm",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "cái",
+          "prediction": "cái",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "bánh",
+          "prediction": "bánh",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "mì",
+          "prediction": "mì",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "nhai",
@@ -1117,61 +2054,81 @@
     },
     {
       "audio": "common_voice_vi_23933072.mp3",
-      "ground_truth": "là anh đây chỉ thăm hỏi đôi lời",
-      "prediction": "lãn đây chỉ tham hội đôi lời",
+      "ground_truth": "Là anh đây chỉ thăm hỏi đôi lời",
+      "prediction": "Lãn đây chỉ tham hội đôi lời.",
+      "analysis_failed": false,
       "wer": 0.5,
-      "cer": 0.1935483870967742,
+      "cer": 0.1935,
       "status": "Sai",
       "errors": [
-        "final_consonant_error",
+        "merge_word",
         "nucleus_error",
-        "initial_consonant_error",
-        "tone_error",
-        "missing_word"
+        "tone_error"
+      ],
+      "alignment": [
+        {
+          "type": "merge_word",
+          "reference": "là anh",
+          "prediction": "lãn"
+        },
+        {
+          "type": "equal",
+          "reference": "đây",
+          "prediction": "đây"
+        },
+        {
+          "type": "equal",
+          "reference": "chỉ",
+          "prediction": "chỉ"
+        },
+        {
+          "type": "substitution",
+          "reference": "thăm",
+          "prediction": "tham"
+        },
+        {
+          "type": "substitution",
+          "reference": "hỏi",
+          "prediction": "hội"
+        },
+        {
+          "type": "equal",
+          "reference": "đôi",
+          "prediction": "đôi"
+        },
+        {
+          "type": "equal",
+          "reference": "lời",
+          "prediction": "lời"
+        }
       ],
       "word_analysis": [
         {
-          "type": "missing_word",
-          "reference": "là",
-          "prediction": "",
+          "type": "merge_word",
+          "reference": "là anh",
+          "prediction": "lãn",
           "errors": [
-            "missing_word"
+            "merge_word"
           ],
           "detail": null
         },
         {
-          "type": "substitution",
-          "reference": "anh",
-          "prediction": "lãn",
+          "type": "equal",
+          "reference": "đây",
+          "prediction": "đây",
           "errors": [
-            "initial_consonant_error",
-            "final_consonant_error",
-            "tone_error"
+            "equal"
           ],
-          "detail": {
-            "word": "anh",
-            "prediction": "lãn",
-            "initial": {
-              "reference": "",
-              "prediction": "l",
-              "correct": false
-            },
-            "nucleus": {
-              "reference": "a",
-              "prediction": "a",
-              "correct": true
-            },
-            "final": {
-              "reference": "nh",
-              "prediction": "n",
-              "correct": false
-            },
-            "tone": {
-              "reference": "ngang",
-              "prediction": "ngã",
-              "correct": false
-            }
-          }
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "chỉ",
+          "prediction": "chỉ",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         },
         {
           "type": "substitution",
@@ -1237,19 +2194,60 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "đôi",
+          "prediction": "đôi",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "lời",
+          "prediction": "lời",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_24304490.mp3",
-      "ground_truth": "giai đoạn lãnh đạo",
-      "prediction": "giay đoạn lánh đạo",
+      "ground_truth": "Giai đoạn lãnh đạo",
+      "prediction": "Giay đoạn lánh đạo.",
+      "analysis_failed": false,
       "wer": 0.5,
-      "cer": 0.1111111111111111,
+      "cer": 0.1111,
       "status": "Sai",
       "errors": [
-        "tone_error",
-        "nucleus_error"
+        "nucleus_error",
+        "tone_error"
+      ],
+      "alignment": [
+        {
+          "type": "substitution",
+          "reference": "giai",
+          "prediction": "giay"
+        },
+        {
+          "type": "equal",
+          "reference": "đoạn",
+          "prediction": "đoạn"
+        },
+        {
+          "type": "substitution",
+          "reference": "lãnh",
+          "prediction": "lánh"
+        },
+        {
+          "type": "equal",
+          "reference": "đạo",
+          "prediction": "đạo"
+        }
       ],
       "word_analysis": [
         {
@@ -1285,6 +2283,15 @@
           }
         },
         {
+          "type": "equal",
+          "reference": "đoạn",
+          "prediction": "đoạn",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
           "type": "substitution",
           "reference": "lãnh",
           "prediction": "lánh",
@@ -1315,21 +2322,63 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "đạo",
+          "prediction": "đạo",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_24144207.mp3",
-      "ground_truth": "cao đến ngực người trưởng thành",
-      "prediction": "cào đến ngực người chữa thân",
+      "ground_truth": "Cao đến ngực người trưởng thành",
+      "prediction": "Cào đến ngực người chữa thân.",
+      "analysis_failed": false,
       "wer": 0.5,
-      "cer": 0.2903225806451613,
+      "cer": 0.2903,
       "status": "Sai",
       "errors": [
-        "initial_consonant_error",
         "tone_error",
+        "initial_consonant_error",
         "nucleus_error",
         "final_consonant_error"
+      ],
+      "alignment": [
+        {
+          "type": "substitution",
+          "reference": "cao",
+          "prediction": "cào"
+        },
+        {
+          "type": "equal",
+          "reference": "đến",
+          "prediction": "đến"
+        },
+        {
+          "type": "equal",
+          "reference": "ngực",
+          "prediction": "ngực"
+        },
+        {
+          "type": "equal",
+          "reference": "người",
+          "prediction": "người"
+        },
+        {
+          "type": "substitution",
+          "reference": "trưởng",
+          "prediction": "chữa"
+        },
+        {
+          "type": "substitution",
+          "reference": "thành",
+          "prediction": "thân"
+        }
       ],
       "word_analysis": [
         {
@@ -1363,6 +2412,33 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "đến",
+          "prediction": "đến",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "ngực",
+          "prediction": "ngực",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "người",
+          "prediction": "người",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         },
         {
           "type": "substitution",
@@ -1437,9 +2513,10 @@
     },
     {
       "audio": "common_voice_vi_40249427.mp3",
-      "ground_truth": "tự nhiên không đâu vào đâu lại sang nói chuyện này",
-      "prediction": "tự nhiên không đâu vào đâu lại xe nói chuyện này",
-      "wer": 0.0909090909090909,
+      "ground_truth": "Tự nhiên không đâu vào đâu lại sang nói chuyện này",
+      "prediction": "Tự nhiên không đâu vào đâu lại xe nói chuyện này.",
+      "analysis_failed": false,
+      "wer": 0.0909,
       "cer": 0.08,
       "status": "Sai",
       "errors": [
@@ -1447,7 +2524,127 @@
         "nucleus_error",
         "final_consonant_error"
       ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "tự",
+          "prediction": "tự"
+        },
+        {
+          "type": "equal",
+          "reference": "nhiên",
+          "prediction": "nhiên"
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không"
+        },
+        {
+          "type": "equal",
+          "reference": "đâu",
+          "prediction": "đâu"
+        },
+        {
+          "type": "equal",
+          "reference": "vào",
+          "prediction": "vào"
+        },
+        {
+          "type": "equal",
+          "reference": "đâu",
+          "prediction": "đâu"
+        },
+        {
+          "type": "equal",
+          "reference": "lại",
+          "prediction": "lại"
+        },
+        {
+          "type": "substitution",
+          "reference": "sang",
+          "prediction": "xe"
+        },
+        {
+          "type": "equal",
+          "reference": "nói",
+          "prediction": "nói"
+        },
+        {
+          "type": "equal",
+          "reference": "chuyện",
+          "prediction": "chuyện"
+        },
+        {
+          "type": "equal",
+          "reference": "này",
+          "prediction": "này"
+        }
+      ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "tự",
+          "prediction": "tự",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "nhiên",
+          "prediction": "nhiên",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "đâu",
+          "prediction": "đâu",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "vào",
+          "prediction": "vào",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "đâu",
+          "prediction": "đâu",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "lại",
+          "prediction": "lại",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "sang",
@@ -1481,22 +2678,100 @@
               "correct": true
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "nói",
+          "prediction": "nói",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "chuyện",
+          "prediction": "chuyện",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "này",
+          "prediction": "này",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_24363084.mp3",
-      "ground_truth": "nó lại khỏe mạnh trở lại",
-      "prediction": "nó lại quay mạnh chờ lại",
-      "wer": 0.3333333333333333,
-      "cer": 0.2916666666666667,
+      "ground_truth": "Nó lại khỏe mạnh trở lại",
+      "prediction": "Nó lại quay mạnh chờ lại.",
+      "analysis_failed": false,
+      "wer": 0.3333,
+      "cer": 0.2917,
       "status": "Sai",
       "errors": [
         "initial_consonant_error",
-        "tone_error",
-        "nucleus_error"
+        "nucleus_error",
+        "tone_error"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "nó",
+          "prediction": "nó"
+        },
+        {
+          "type": "equal",
+          "reference": "lại",
+          "prediction": "lại"
+        },
+        {
+          "type": "substitution",
+          "reference": "khỏe",
+          "prediction": "quay"
+        },
+        {
+          "type": "equal",
+          "reference": "mạnh",
+          "prediction": "mạnh"
+        },
+        {
+          "type": "substitution",
+          "reference": "trở",
+          "prediction": "chờ"
+        },
+        {
+          "type": "equal",
+          "reference": "lại",
+          "prediction": "lại"
+        }
       ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "nó",
+          "prediction": "nó",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "lại",
+          "prediction": "lại",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "khỏe",
@@ -1532,6 +2807,15 @@
           }
         },
         {
+          "type": "equal",
+          "reference": "mạnh",
+          "prediction": "mạnh",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
           "type": "substitution",
           "reference": "trở",
           "prediction": "chờ",
@@ -1563,33 +2847,207 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "lại",
+          "prediction": "lại",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_25158138.mp3",
-      "ground_truth": "nơi cậu đã nằm đêm qua",
-      "prediction": "nơi cậu đã nằm đêm qua",
+      "ground_truth": "Nơi cậu đã nằm đêm qua",
+      "prediction": "Nơi cậu đã nằm đêm qua",
+      "analysis_failed": false,
       "wer": 0.0,
       "cer": 0.0,
       "status": "Đúng",
       "errors": [],
-      "word_analysis": []
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "nơi",
+          "prediction": "nơi"
+        },
+        {
+          "type": "equal",
+          "reference": "cậu",
+          "prediction": "cậu"
+        },
+        {
+          "type": "equal",
+          "reference": "đã",
+          "prediction": "đã"
+        },
+        {
+          "type": "equal",
+          "reference": "nằm",
+          "prediction": "nằm"
+        },
+        {
+          "type": "equal",
+          "reference": "đêm",
+          "prediction": "đêm"
+        },
+        {
+          "type": "equal",
+          "reference": "qua",
+          "prediction": "qua"
+        }
+      ],
+      "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "nơi",
+          "prediction": "nơi",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "cậu",
+          "prediction": "cậu",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "đã",
+          "prediction": "đã",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "nằm",
+          "prediction": "nằm",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "đêm",
+          "prediction": "đêm",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "qua",
+          "prediction": "qua",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        }
+      ]
     },
     {
       "audio": "common_voice_vi_24362884.mp3",
-      "ground_truth": "thì bà ấy cũng không nói lời nào và ra đi như vậy",
-      "prediction": "thì bởi cũng không nói lời nào và ra đi như vậy",
-      "wer": 0.1538461538461538,
-      "cer": 0.0816326530612244,
+      "ground_truth": "Thì bà ấy cũng không nói lời nào và ra đi như vậy",
+      "prediction": "thì bởi cũng không nói lời nào và ra đi như vậy.",
+      "analysis_failed": false,
+      "wer": 0.1538,
+      "cer": 0.0816,
       "status": "Sai",
       "errors": [
+        "missing_word",
         "initial_consonant_error",
-        "tone_error",
         "nucleus_error",
-        "missing_word"
+        "tone_error"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "thì",
+          "prediction": "thì"
+        },
+        {
+          "type": "missing_word",
+          "reference": "bà",
+          "prediction": ""
+        },
+        {
+          "type": "substitution",
+          "reference": "ấy",
+          "prediction": "bởi"
+        },
+        {
+          "type": "equal",
+          "reference": "cũng",
+          "prediction": "cũng"
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không"
+        },
+        {
+          "type": "equal",
+          "reference": "nói",
+          "prediction": "nói"
+        },
+        {
+          "type": "equal",
+          "reference": "lời",
+          "prediction": "lời"
+        },
+        {
+          "type": "equal",
+          "reference": "nào",
+          "prediction": "nào"
+        },
+        {
+          "type": "equal",
+          "reference": "và",
+          "prediction": "và"
+        },
+        {
+          "type": "equal",
+          "reference": "ra",
+          "prediction": "ra"
+        },
+        {
+          "type": "equal",
+          "reference": "đi",
+          "prediction": "đi"
+        },
+        {
+          "type": "equal",
+          "reference": "như",
+          "prediction": "như"
+        },
+        {
+          "type": "equal",
+          "reference": "vậy",
+          "prediction": "vậy"
+        }
       ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "thì",
+          "prediction": "thì",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "missing_word",
           "reference": "bà",
@@ -1632,13 +3090,104 @@
               "correct": false
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "cũng",
+          "prediction": "cũng",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "nói",
+          "prediction": "nói",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "lời",
+          "prediction": "lời",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "nào",
+          "prediction": "nào",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "và",
+          "prediction": "và",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "ra",
+          "prediction": "ra",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "đi",
+          "prediction": "đi",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "như",
+          "prediction": "như",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
+        {
+          "type": "equal",
+          "reference": "vậy",
+          "prediction": "vậy",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_23901409.mp3",
-      "ground_truth": "không tao không muốn",
-      "prediction": "không tạo khùng muống",
+      "ground_truth": "Không Tao không muốn",
+      "prediction": "Không tạo khùng muống.",
+      "analysis_failed": false,
       "wer": 0.75,
       "cer": 0.15,
       "status": "Sai",
@@ -1647,7 +3196,38 @@
         "nucleus_error",
         "final_consonant_error"
       ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không"
+        },
+        {
+          "type": "substitution",
+          "reference": "tao",
+          "prediction": "tạo"
+        },
+        {
+          "type": "substitution",
+          "reference": "không",
+          "prediction": "khùng"
+        },
+        {
+          "type": "substitution",
+          "reference": "muốn",
+          "prediction": "muống"
+        }
+      ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "không",
+          "prediction": "không",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "tao",
@@ -1749,16 +3329,48 @@
     },
     {
       "audio": "common_voice_vi_23380408.mp3",
-      "ground_truth": "thấy ánh mặt trời",
-      "prediction": "thấy anh mặc trời",
+      "ground_truth": "Thấy ánh mặt trời",
+      "prediction": "Thấy anh mặc trời.",
+      "analysis_failed": false,
       "wer": 0.5,
-      "cer": 0.1176470588235294,
+      "cer": 0.1176,
       "status": "Sai",
       "errors": [
         "tone_error",
         "final_consonant_error"
       ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "thấy",
+          "prediction": "thấy"
+        },
+        {
+          "type": "substitution",
+          "reference": "ánh",
+          "prediction": "anh"
+        },
+        {
+          "type": "substitution",
+          "reference": "mặt",
+          "prediction": "mặc"
+        },
+        {
+          "type": "equal",
+          "reference": "trời",
+          "prediction": "trời"
+        }
+      ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "thấy",
+          "prediction": "thấy",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "ánh",
@@ -1822,20 +3434,61 @@
               "correct": true
             }
           }
+        },
+        {
+          "type": "equal",
+          "reference": "trời",
+          "prediction": "trời",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
         }
       ]
     },
     {
       "audio": "common_voice_vi_42788758.mp3",
-      "ground_truth": "cây cỏ tỉnh táo",
-      "prediction": "cây cò tình tạo",
+      "ground_truth": "Cây cỏ tỉnh táo",
+      "prediction": "Cây cò tình tạo",
+      "analysis_failed": false,
       "wer": 0.75,
       "cer": 0.2,
       "status": "Sai",
       "errors": [
         "tone_error"
       ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "cây",
+          "prediction": "cây"
+        },
+        {
+          "type": "substitution",
+          "reference": "cỏ",
+          "prediction": "cò"
+        },
+        {
+          "type": "substitution",
+          "reference": "tỉnh",
+          "prediction": "tình"
+        },
+        {
+          "type": "substitution",
+          "reference": "táo",
+          "prediction": "tạo"
+        }
+      ],
       "word_analysis": [
+        {
+          "type": "equal",
+          "reference": "cây",
+          "prediction": "cây",
+          "errors": [
+            "equal"
+          ],
+          "detail": null
+        },
         {
           "type": "substitution",
           "reference": "cỏ",

@@ -1,39 +1,84 @@
 # -*- coding: utf-8 -*-
 
-# =====================================================
-# main.py
-# Vietnamese ASR Analyzer API V10.6.1
-# FastAPI + React Dashboard Compatible
-# =====================================================
+import json
+import os
 
+from pathlib import Path
+from typing import Any, Optional
 
-from fastapi import (
-    FastAPI,
-    UploadFile,
-    File,
-    Form
-)
-
-
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 
-import json
-import pandas as pd
-import os
-import shutil
-import uuid
+
+# =====================================================
+# CONFIG
+# =====================================================
 
 
+BASE_DIR = Path(
 
-from whisper_engine import transcribe_audio
+    os.getenv(
 
+        "ASR_DATASET_DIR",
 
-from audio_analyzer import (
-    calculate_score,
-    simple_error_check,
-    analyze_sentence_phoneme
+        Path(__file__).resolve().parents[2] / "dataset"
+
+    )
+
 )
+
+
+STAT_FILE = BASE_DIR / "error_statistics.json"
+
+ANALYSIS_FILE = BASE_DIR / "sentence_analysis.json"
+
+
+
+
+
+ALLOWED_ORIGINS = os.getenv(
+
+    "CORS_ORIGINS",
+
+    "http://localhost:5173,http://localhost:5174,http://localhost:3000"
+
+).split(",")
+
+
+
+
+
+STATUS_MAP = {
+
+
+    "correct":
+    "correct",
+
+
+    "Đúng":
+    "correct",
+
+
+
+    "incorrect":
+    "incorrect",
+
+
+    "Sai":
+    "incorrect",
+
+
+
+    "failed":
+    "failed",
+
+
+    "Lỗi phân tích":
+    "failed"
+
+}
+
 
 
 
@@ -46,21 +91,13 @@ from audio_analyzer import (
 
 app = FastAPI(
 
-    title="Vietnamese ASR Analyzer API",
-
-    version="10.6.1"
+    title="Vietnamese ASR Error Analyzer API"
 
 )
 
 
 
 
-
-
-
-# =====================================================
-# CORS
-# =====================================================
 
 
 app.add_middleware(
@@ -68,22 +105,16 @@ app.add_middleware(
     CORSMiddleware,
 
 
-    allow_origins=[
-
-        "http://localhost:5173",
-
-        "http://localhost:5174"
-
-    ],
+    allow_origins=ALLOWED_ORIGINS,
 
 
-    allow_credentials=True,
+    allow_credentials=False,
 
 
-    allow_methods=["*"],
+    allow_methods=["GET"],
 
 
-    allow_headers=["*"]
+    allow_headers=["*"],
 
 )
 
@@ -94,68 +125,213 @@ app.add_middleware(
 
 
 # =====================================================
-# PATH
+# CACHE
 # =====================================================
 
 
-BASE_DIR = r"E:\ASR_Project\dataset"
-
-
-UPLOAD_DIR = r"E:\ASR_Project\web\backend\uploads"
+_json_cache: dict[Path, tuple[float, Any]] = {}
 
 
 
-REPORT_FILE = os.path.join(
+_index = {
 
-    BASE_DIR,
+    "src": None,
 
-    "summary_report.json"
+    "items": [],
 
-)
+    "by_audio": {}
 
-
-
-ERROR_FILE = os.path.join(
-
-    BASE_DIR,
-
-    "vietnamese_error_analysis.csv"
-
-)
-
-
-
-ANALYSIS_FILE = os.path.join(
-
-    BASE_DIR,
-
-    "sentence_analysis.json"
-
-)
-
-
-
-STATISTICS_FILE = os.path.join(
-
-    BASE_DIR,
-
-    "error_statistics.json"
-
-)
+}
 
 
 
 
 
-os.makedirs(
-
-    UPLOAD_DIR,
-
-    exist_ok=True
-
-)
 
 
+# =====================================================
+# LOAD JSON
+# =====================================================
+
+
+def load_json(path: Path):
+
+
+    try:
+
+        mtime = path.stat().st_mtime
+
+
+    except FileNotFoundError:
+
+
+        raise HTTPException(
+
+            status_code=503,
+
+            detail=f"Chưa có file {path.name}"
+
+        )
+
+
+
+
+    cached = _json_cache.get(path)
+
+
+
+    if cached and cached[0] == mtime:
+
+
+        return cached[1]
+
+
+
+
+    try:
+
+
+        with open(
+
+            path,
+
+            "r",
+
+            encoding="utf-8"
+
+        ) as f:
+
+
+            data = json.load(f)
+
+
+
+    except json.JSONDecodeError as e:
+
+
+
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=f"Lỗi JSON {path.name}: {e}"
+
+        )
+
+
+
+
+    _json_cache[path] = (
+
+        mtime,
+
+        data
+
+    )
+
+
+
+    return data
+
+
+
+
+
+
+
+# =====================================================
+# INDEX AUDIO
+# =====================================================
+
+
+def get_items():
+
+
+    data = load_json(
+
+        ANALYSIS_FILE
+
+    )
+
+
+
+    if _index["src"] is not data:
+
+
+        items = data.get(
+
+            "data",
+
+            []
+
+        )
+
+
+
+        for item in items:
+
+
+            item["status"] = STATUS_MAP.get(
+
+                item.get("status"),
+
+                "failed"
+
+            )
+
+
+
+        _index.update({
+
+            "src": data,
+
+
+            "items": items,
+
+
+            "by_audio": {
+
+                x.get("audio"): x
+
+                for x in items
+
+            }
+
+        })
+
+
+
+
+    return (
+
+        _index["items"],
+
+        _index["by_audio"]
+
+    )
+
+
+
+
+
+
+
+# =====================================================
+# NUMBER CONVERT
+# =====================================================
+
+
+def _num(value) -> Optional[float]:
+
+
+    try:
+
+        return float(value)
+
+
+    except:
+
+        return None
 
 
 
@@ -172,11 +348,13 @@ os.makedirs(
 
 def home():
 
+
     return {
+
 
         "message":
 
-        "Vietnamese ASR Analyzer API running"
+        "Vietnamese ASR Error Analyzer API"
 
     }
 
@@ -189,258 +367,7 @@ def home():
 
 
 # =====================================================
-# HEALTH
-# =====================================================
-
-
-@app.get("/health")
-
-def health():
-
-    return {
-
-
-        "status":
-
-        "OK",
-
-
-        "report":
-
-        os.path.exists(REPORT_FILE),
-
-
-        "errors":
-
-        os.path.exists(ERROR_FILE),
-
-
-        "analysis":
-
-        os.path.exists(ANALYSIS_FILE),
-
-
-        "statistics":
-
-        os.path.exists(STATISTICS_FILE),
-
-
-        "whisper":
-
-        True
-
-    }
-
-
-
-
-
-
-
-
-
-# =====================================================
-# OLD REPORT API
-# React đang dùng
-# =====================================================
-
-
-@app.get("/report")
-
-def report():
-
-
-    if not os.path.exists(REPORT_FILE):
-
-        return {
-
-            "error":
-
-            "Không tìm thấy summary_report.json"
-
-        }
-
-
-
-    with open(
-
-        REPORT_FILE,
-
-        "r",
-
-        encoding="utf-8"
-
-    ) as f:
-
-
-        return json.load(f)
-
-
-
-
-
-
-
-
-
-# =====================================================
-# OLD ERROR API
-# =====================================================
-
-
-@app.get("/errors")
-
-def errors():
-
-
-    if not os.path.exists(ERROR_FILE):
-
-        return {
-
-            "error":
-
-            "Không tìm thấy file lỗi"
-
-        }
-
-
-
-    df = pd.read_csv(
-
-        ERROR_FILE,
-
-        encoding="utf-8-sig"
-
-    )
-
-
-
-    df=df.fillna("")
-
-
-
-    result=[]
-
-
-
-    for _,row in df.iterrows():
-
-        result.append({
-
-            "audio":
-
-            row.get(
-
-                "audio",
-
-                ""
-
-            ),
-
-
-            "reference":
-
-            row.get(
-
-                "reference_word",
-
-                ""
-
-            ),
-
-
-            "prediction":
-
-            row.get(
-
-                "hypothesis_word",
-
-                ""
-
-            ),
-
-
-            "error_type":
-
-            row.get(
-
-                "error_type",
-
-                ""
-
-            )
-
-        })
-
-
-
-    return {
-
-
-        "total":
-
-        len(result),
-
-
-        "data":
-
-        result
-
-    }
-
-
-
-
-
-
-
-
-
-# =====================================================
-# OLD ANALYSIS API
-# =====================================================
-
-
-@app.get("/analysis")
-
-def analysis():
-
-
-    if not os.path.exists(ANALYSIS_FILE):
-
-        return {
-
-            "error":
-
-            "Không tìm thấy sentence_analysis.json"
-
-        }
-
-
-
-    with open(
-
-        ANALYSIS_FILE,
-
-        "r",
-
-        encoding="utf-8"
-
-    ) as f:
-
-
-        return json.load(f)
-
-
-
-
-
-
-
-
-
-# =====================================================
-# NEW STATISTICS API
+# STATISTICS
 # =====================================================
 
 
@@ -449,20 +376,295 @@ def analysis():
 def statistics():
 
 
-    with open(
+    stat = dict(
 
-        STATISTICS_FILE,
+        load_json(STAT_FILE)
 
-        "r",
-
-        encoding="utf-8"
-
-    ) as f:
+    )
 
 
-        return json.load(f)
+    items, _ = get_items()
 
 
+
+
+
+    wer_vals = [
+
+        _num(x.get("wer"))
+
+        for x in items
+
+        if _num(x.get("wer")) is not None
+
+    ]
+
+
+
+    cer_vals = [
+
+        _num(x.get("cer"))
+
+        for x in items
+
+        if _num(x.get("cer")) is not None
+
+    ]
+
+
+
+
+
+
+    # Corpus WER
+
+    total_error = 0
+
+    total_words = 0
+
+
+
+    for x in items:
+
+
+        wer = _num(
+
+            x.get("wer")
+
+        )
+
+
+        words = len(
+
+            str(
+
+                x.get(
+
+                    "ground_truth",
+
+                    ""
+
+                )
+
+            ).split()
+
+        )
+
+
+        if wer is not None and words > 0:
+
+
+            total_error += wer * words
+
+            total_words += words
+
+
+
+
+
+
+
+    def count(status):
+
+
+        return sum(
+
+            1
+
+            for x in items
+
+            if x["status"] == status
+
+        )
+
+
+
+
+
+
+
+    scored = [
+
+        x
+
+        for x in items
+
+        if _num(x.get("wer")) is not None
+
+    ]
+
+
+
+
+
+    worst = max(
+
+        scored,
+
+        key=lambda x:
+
+        _num(x.get("wer")),
+
+        default=None
+
+    )
+
+
+
+
+
+
+
+
+    stat.update({
+
+
+
+        "average_wer":
+
+        round(
+
+            sum(wer_vals)
+
+            /
+
+            len(wer_vals),
+
+            4
+
+        )
+
+        if wer_vals else 0,
+
+
+
+
+
+        "average_cer":
+
+        round(
+
+            sum(cer_vals)
+
+            /
+
+            len(cer_vals),
+
+            4
+
+        )
+
+        if cer_vals else 0,
+
+
+
+
+
+        "corpus_wer":
+
+        round(
+
+            total_error
+
+            /
+
+            total_words,
+
+            4
+
+        )
+
+        if total_words else 0,
+
+
+
+
+
+        "correct_sentence":
+
+        count("correct"),
+
+
+
+
+        "incorrect_sentence":
+
+        count("incorrect"),
+
+
+
+
+
+        "failed_sentence":
+
+        count("failed"),
+
+
+
+
+
+        "score_chart":
+
+        [
+
+            {
+
+                "audio":
+
+                x.get("audio"),
+
+
+                "wer":
+
+                _num(x.get("wer")) or 0,
+
+
+                "cer":
+
+                _num(x.get("cer")) or 0
+
+            }
+
+
+            for x in items
+
+        ],
+
+
+
+
+
+
+        "worst_audio":
+
+        {
+
+            "audio":
+
+            worst.get("audio"),
+
+
+            "wer":
+
+            worst.get("wer"),
+
+
+            "cer":
+
+            worst.get("cer")
+
+        }
+
+        if worst else None
+
+
+
+    })
+
+
+
+
+    return stat
 
 
 
@@ -477,53 +679,110 @@ def statistics():
 
 @app.get("/api/audio-list")
 
-def audio_list():
+def audio_list(
 
 
-    with open(
+    status: Optional[str] = Query(
 
-        ANALYSIS_FILE,
+        None,
 
-        "r",
+        pattern="^(correct|incorrect|failed)$"
 
-        encoding="utf-8"
-
-    ) as f:
+    ),
 
 
-        data=json.load(f)
+    q: Optional[str] = None,
+
+
+    limit: Optional[int] = Query(
+
+        None,
+
+        ge=1,
+
+        le=5000
+
+    ),
+
+
+    offset: int = Query(
+
+        0,
+
+        ge=0
+
+    )
+
+
+):
 
 
 
-    result=[]
+    items, _ = get_items()
 
 
 
-    for item in data["data"]:
+
+    if status:
 
 
-        result.append({
+        items = [
 
-            "audio":
+            x
 
-            item["audio"],
+            for x in items
 
+            if x["status"] == status
 
-            "wer":
-
-            item["wer"],
-
-
-            "cer":
-
-            item["cer"],
+        ]
 
 
-            "status":
 
-            item["status"]
 
-        })
+
+    if q:
+
+
+        q = q.lower()
+
+
+
+        items = [
+
+            x
+
+            for x in items
+
+            if q in str(
+
+                x.get("audio","")
+
+            ).lower()
+
+        ]
+
+
+
+
+
+
+
+    total = len(items)
+
+
+
+    page = (
+
+        items[offset:offset+limit]
+
+        if limit
+
+        else items[offset:]
+
+    )
+
+
+
 
 
 
@@ -532,15 +791,59 @@ def audio_list():
 
         "total":
 
-        len(result),
+        total,
+
 
 
         "data":
 
-        result
+        [
+
+            {
+
+
+                "audio":
+
+                x.get("audio"),
+
+
+
+                "wer":
+
+                x.get("wer"),
+
+
+
+                "cer":
+
+                x.get("cer"),
+
+
+
+                "status":
+
+                x["status"],
+
+
+
+                "errors":
+
+                x.get(
+
+                    "errors",
+
+                    []
+
+                )
+
+            }
+
+
+            for x in page
+
+        ]
 
     }
-
 
 
 
@@ -554,231 +857,30 @@ def audio_list():
 # =====================================================
 
 
-@app.get("/api/audio-detail/{audio}")
+@app.get("/api/audio-detail/{audio:path}")
 
 def audio_detail(audio:str):
 
 
-    with open(
-
-        ANALYSIS_FILE,
-
-        "r",
-
-        encoding="utf-8"
-
-    ) as f:
-
-
-        data=json.load(f)
+    _, by_audio = get_items()
 
 
 
-    for item in data["data"]:
-
-
-        if item["audio"] == audio:
-
-
-            return item
+    item = by_audio.get(audio)
 
 
 
-    return {
+    if item is None:
 
 
-        "error":
+        raise HTTPException(
 
-        "Không tìm thấy audio"
+            status_code=404,
 
-    }
-
-
-
-
-
-
-
-
-
-# =====================================================
-# UPLOAD ANALYZE
-# =====================================================
-
-
-@app.post("/upload-analyze")
-
-async def upload_analyze(
-
-    audio:UploadFile = File(...),
-
-    reference:str = Form(...)
-
-):
-
-
-    filename = (
-
-        str(uuid.uuid4())
-
-        +
-
-        "_"
-
-        +
-
-        audio.filename
-
-    )
-
-
-
-    path=os.path.join(
-
-        UPLOAD_DIR,
-
-        filename
-
-    )
-
-
-
-
-
-    with open(
-
-        path,
-
-        "wb"
-
-    ) as f:
-
-
-        shutil.copyfileobj(
-
-            audio.file,
-
-            f
+            detail="Audio not found"
 
         )
 
 
 
-
-
-    prediction=transcribe_audio(path)
-
-
-
-    score=calculate_score(
-
-        reference,
-
-        prediction
-
-    )
-
-
-
-    errors=simple_error_check(
-
-        reference,
-
-        prediction
-
-    )
-
-
-
-    word_analysis=analyze_sentence_phoneme(
-
-        reference,
-
-        prediction
-
-    )
-
-
-
-    return {
-
-
-        "audio":
-
-        audio.filename,
-
-
-        "ground_truth":
-
-        reference,
-
-
-        "prediction":
-
-        prediction,
-
-
-        "wer":
-
-        score["wer"],
-
-
-        "cer":
-
-        score["cer"],
-
-
-        "status":
-
-        (
-
-            "Đúng"
-
-            if len(errors)==0
-
-            else
-
-            "Sai"
-
-        ),
-
-
-        "errors":
-
-        errors,
-
-
-        "word_analysis":
-
-        word_analysis
-
-    }
-
-
-
-
-
-
-
-
-
-# =====================================================
-# START SERVER
-# =====================================================
-
-
-if __name__ == "__main__":
-
-
-    import uvicorn
-
-
-    uvicorn.run(
-
-        app,
-
-        host="127.0.0.1",
-
-        port=8000
-
-    )
+    return item

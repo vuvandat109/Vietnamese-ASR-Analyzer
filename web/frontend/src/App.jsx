@@ -13,15 +13,19 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
+  YAxis,
+  Legend
 } from "recharts";
 
 import "./App.css";
 
 
+
 const API =
   import.meta.env.VITE_API_URL ??
   "http://127.0.0.1:8000";
+
+
 
 
 
@@ -55,11 +59,16 @@ const ERROR_LABELS = {
 
 
 
-function translateError(e){
 
-  return ERROR_LABELS[e] ?? e;
+
+function translateError(error){
+
+  return ERROR_LABELS[error] ?? error;
 
 }
+
+
+
 
 
 
@@ -88,11 +97,14 @@ const STATUS_MAP = {
 
 
 
+
+
 function getStatus(item){
 
   return STATUS_MAP[item.status] ?? "failed";
 
 }
+
 
 
 
@@ -115,9 +127,12 @@ const STATUS_LABEL = {
 
 
 
+
+
 function formatPercent(value){
 
-  const number = Number(value);
+  const number =
+  Number(value);
 
 
   if(
@@ -143,32 +158,49 @@ function formatPercent(value){
 
 
 
+
+
 function StatCard({
+
   title,
+
   value,
+
   className
+
 }){
 
 
-  return (
+return (
 
-    <div className="card">
-
-      <h3>
-        {title}
-      </h3>
+<div className="card">
 
 
-      <strong className={className}>
-        {value ?? 0}
-      </strong>
+<h3>
+
+{title}
+
+</h3>
 
 
-    </div>
 
-  );
+<strong className={className}>
+
+{value ?? 0}
+
+</strong>
+
+
+</div>
+
+);
+
 
 }
+
+
+
+
 
 
 
@@ -179,319 +211,184 @@ function StatCard({
 
 
 function DetailModal({
+
   data,
+
   onClose
+
 }){
 
 
-  return (
+return (
 
-    <div
-      className="modal-overlay"
-      onClick={onClose}
-    >
+<div
+className="drawer-overlay"
+onClick={onClose}
+>
 
 
-      <div
 
-        className="modal"
+<div
+className="drawer"
+onClick={
+e=>e.stopPropagation()
+}
+>
 
-        onClick={
-          e=>e.stopPropagation()
-        }
 
-      >
 
 
 
-        <button
+<button
 
-          className="close-btn"
+className="close-btn"
 
-          onClick={onClose}
+onClick={onClose}
 
-        >
+>
 
-          X
+X
 
-        </button>
+</button>
 
 
 
 
 
-        <h2>
-          Chi tiết phân tích
-        </h2>
+<h2>
 
+Chi tiết phân tích
 
+</h2>
 
 
 
-        <h3>
-          Audio
-        </h3>
 
-        <p>
-          {data.audio}
-        </p>
 
+<h3>
 
+Audio
 
+</h3>
 
 
-        <h3>
-          Câu chuẩn
-        </h3>
+<p>
 
-        <div className="text-box">
+{data.audio}
 
-          {data.ground_truth}
+</p>
 
-        </div>
 
 
 
 
+<h3>
 
-        <h3>
-          Whisper
-        </h3>
+Câu chuẩn
 
+</h3>
 
-        <div className="text-box">
 
-          {data.prediction}
 
-        </div>
+<div className="text-box">
 
+{data.ground_truth}
 
+</div>
 
 
 
-        <h3>
-          WER / CER
-        </h3>
 
 
-        <p>
+<h3>
 
-          {formatPercent(data.wer)}
+Whisper
 
-          {" / "}
+</h3>
 
-          {formatPercent(data.cer)}
 
-        </p>
 
+<div className="text-box">
 
+{data.prediction}
 
+</div>
 
 
-        <h3>
-          Phân loại lỗi
-        </h3>
 
 
-        {
 
-          data.errors?.length === 0
+<h3>
 
-          ?
+WER / CER
 
-          <p>
-            Không có lỗi
-          </p>
+</h3>
 
-          :
 
-          data.errors.map(
-            (e,index)=>(
 
-              <span
+<p>
 
-                key={index}
+{formatPercent(data.wer)}
 
-                className="error-badge"
+{" / "}
 
-              >
+{formatPercent(data.cer)}
 
-                {translateError(e)}
+</p>
 
-              </span>
 
-            )
 
-          )
 
-        }
 
+<h3>
 
+Phân loại lỗi
 
+</h3>
 
 
 
 
 
-        {
-          data.word_analysis &&
+{
 
-          data.word_analysis.length > 0 &&
+Array.isArray(data.errors)
 
+&&
 
-          <>
+data.errors.length > 0
 
-          <h3>
-            Chi tiết lỗi phát âm
-          </h3>
+?
 
+data.errors.map(
 
+(error,index)=>(
 
-          {
-            data.word_analysis.map(
-              (item,index)=>(
 
+<span
 
-                <div
+key={index}
 
-                  key={index}
+className="error-badge"
 
-                  className="word-card"
+>
 
-                >
+{translateError(error)}
 
+</span>
 
-                  <b>
 
-                    {item.reference}
+)
 
-                    {" → "}
+)
 
-                    {item.prediction}
+:
 
-                  </b>
+<p>
 
+Không có lỗi
 
-
-                  {
-
-                    item.detail &&
-
-                    <div>
-
-
-                      <p>
-
-                      Âm đầu:
-
-                      {" "}
-
-                      {
-                        item.detail.initial.reference
-                      }
-
-                      {" → "}
-
-                      {
-                        item.detail.initial.prediction
-                      }
-
-
-                      </p>
-
-
-
-                      <p>
-
-                      Âm chính:
-
-                      {" "}
-
-                      {
-                        item.detail.nucleus.reference
-                      }
-
-                      {" → "}
-
-                      {
-                        item.detail.nucleus.prediction
-                      }
-
-
-                      </p>
-
-
-
-                      <p>
-
-                      Âm cuối:
-
-                      {" "}
-
-                      {
-                        item.detail.final.reference || "-"
-                      }
-
-                      {" → "}
-
-                      {
-                        item.detail.final.prediction || "-"
-                      }
-
-
-                      </p>
-
-
-
-                      <p>
-
-                      Thanh điệu:
-
-                      {" "}
-
-                      {
-                        item.detail.tone.reference
-                      }
-
-                      {" → "}
-
-                      {
-                        item.detail.tone.prediction
-                      }
-
-
-                      </p>
-
-
-                    </div>
-
-
-                  }
-
-
-
-                </div>
-
-
-              )
-
-            )
-
-          }
-
-
-          </>
-
-        }
-
-
-
-      </div>
-
-
-    </div>
-
-  );
+</p>
 
 }
 
@@ -501,56 +398,542 @@ function DetailModal({
 
 
 
+{/* ============================
+    PHONEME DETAIL FIXED
+============================ */}
 
 
+
+{
+
+Array.isArray(data.word_analysis)
+
+&&
+
+data.word_analysis.length > 0
+
+&&
+
+(
+
+
+<>
+
+
+<h3>
+
+Chi tiết lỗi phát âm
+
+</h3>
+
+
+
+
+{
+
+Array.isArray(data.word_analysis)
+
+&&
+
+data.word_analysis.length > 0
+
+&&
+
+<section>
+
+<h3>
+Chi tiết lỗi phát âm
+</h3>
+
+
+<div>
+
+
+{
+
+data.word_analysis.map(
+
+(item,index)=>(
+
+
+<div
+
+key={index}
+
+className="alignment-card"
+
+>
+
+
+<div className="alignment-title">
+
+
+<span className="reference-word">
+
+{item.reference}
+
+</span>
+
+
+&nbsp; → &nbsp;
+
+
+<span className="prediction-word">
+
+{item.prediction}
+
+</span>
+
+
+</div>
+
+
+
+
+
+<table className="phoneme-table">
+
+
+<thead>
+
+<tr>
+
+<th>
+Thành phần
+</th>
+
+<th>
+Ground Truth
+</th>
+
+<th>
+Whisper
+</th>
+
+<th>
+Kết quả
+</th>
+
+</tr>
+
+</thead>
+
+
+
+
+
+<tbody>
+
+
+<tr>
+
+<td>
+Âm đầu
+</td>
+
+<td>
+
+{
+item.detail?.initial?.reference ?? "-"
+}
+
+</td>
+
+<td>
+
+{
+item.detail?.initial?.prediction ?? "-"
+}
+
+</td>
+
+
+<td
+
+className={
+
+item.detail?.initial?.reference ===
+
+item.detail?.initial?.prediction
+
+?
+
+"correct-cell"
+
+:
+
+"error-cell"
+
+}
+
+>
+
+{
+
+item.detail?.initial?.reference ===
+
+item.detail?.initial?.prediction
+
+?
+
+"Đúng"
+
+:
+
+"Sai"
+
+}
+
+</td>
+
+
+</tr>
+
+
+
+
+
+
+<tr>
+
+<td>
+Âm chính
+</td>
+
+<td>
+
+{
+item.detail?.nucleus?.reference ?? "-"
+}
+
+</td>
+
+<td>
+
+{
+item.detail?.nucleus?.prediction ?? "-"
+}
+
+</td>
+
+
+<td
+
+className={
+
+item.detail?.nucleus?.reference ===
+
+item.detail?.nucleus?.prediction
+
+?
+
+"correct-cell"
+
+:
+
+"error-cell"
+
+}
+
+>
+
+{
+
+item.detail?.nucleus?.reference ===
+
+item.detail?.nucleus?.prediction
+
+?
+
+"Đúng"
+
+:
+
+"Sai"
+
+}
+
+</td>
+
+
+</tr>
+
+
+
+
+
+
+<tr>
+
+<td>
+Âm cuối
+</td>
+
+<td>
+
+{
+item.detail?.final?.reference || "-"
+}
+
+</td>
+
+<td>
+
+{
+item.detail?.final?.prediction || "-"
+}
+
+</td>
+
+
+<td
+
+className={
+
+item.detail?.final?.reference ===
+
+item.detail?.final?.prediction
+
+?
+
+"correct-cell"
+
+:
+
+"error-cell"
+
+}
+
+>
+
+{
+
+item.detail?.final?.reference ===
+
+item.detail?.final?.prediction
+
+?
+
+"Đúng"
+
+:
+
+"Sai"
+
+}
+
+</td>
+
+
+</tr>
+
+
+
+
+
+
+
+<tr>
+
+<td>
+Thanh điệu
+</td>
+
+<td>
+
+{
+item.detail?.tone?.reference || "-"
+}
+
+</td>
+
+
+<td>
+
+{
+item.detail?.tone?.prediction || "-"
+}
+
+</td>
+
+
+<td
+
+className={
+
+item.detail?.tone?.reference ===
+
+item.detail?.tone?.prediction
+
+?
+
+"correct-cell"
+
+:
+
+"error-cell"
+
+}
+
+>
+
+{
+
+item.detail?.tone?.reference ===
+
+item.detail?.tone?.prediction
+
+?
+
+"Đúng"
+
+:
+
+"Sai"
+
+}
+
+</td>
+
+
+</tr>
+
+
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+)
+
+)
+
+
+}
+
+
+</div>
+
+
+</section>
+
+
+}
+
+
+
+</>
+
+)
+
+
+}
+
+
+
+
+</div>
+
+
+</div>
+
+
+);
+
+
+}
 export default function App(){
 
 
+const [
 
-const [statistics,setStatistics]
-=
-useState(null);
+statistics,
 
+setStatistics
 
-
-const [audioList,setAudioList]
-=
-useState([]);
-
-
-
-const [selected,setSelected]
-=
-useState(null);
-
-
-
-const [loading,setLoading]
-=
-useState(true);
-
-
-
-const [filter,setFilter]
-=
-useState("all");
-
-
-
-const [search,setSearch]
-=
-useState("");
-
-
-
-const [error,setError]
-=
-useState(null);
+] = useState(null);
 
 
 
 
+const [
 
+audioList,
+
+setAudioList
+
+] = useState([]);
+
+
+
+
+const [
+
+selected,
+
+setSelected
+
+] = useState(null);
+
+
+
+
+const [
+
+loading,
+
+setLoading
+
+] = useState(true);
+
+
+
+
+const [
+
+filter,
+
+setFilter
+
+] = useState("all");
+
+
+
+
+const [
+
+search,
+
+setSearch
+
+] = useState("");
+
+
+
+
+const [
+
+error,
+
+setError
+
+] = useState(null);
+
+
+
+
+
+
+
+
+/* ============================
+   LOAD DATA
+============================ */
 
 
 useEffect(()=>{
@@ -558,39 +941,60 @@ useEffect(()=>{
 
 Promise.all([
 
-axios.get(
-`${API}/api/statistics`
-),
 
 axios.get(
+
+`${API}/api/statistics`
+
+),
+
+
+
+axios.get(
+
 `${API}/api/audio-list`
+
 )
+
+
 
 ])
 
 
-.then(([s,a])=>{
+.then(([stat,audio])=>{
 
 
 setStatistics(
-s.data
+
+stat.data
+
 );
+
 
 
 setAudioList(
-a.data.data ?? []
+
+audio.data.data ?? []
+
 );
+
 
 
 })
 
 
-.catch(()=>{
+.catch((err)=>{
+
+
+console.error(err);
 
 
 setError(
-"Không tải được dữ liệu backend"
+
+"Không kết nối được backend"
+
 );
+
 
 
 })
@@ -602,7 +1006,9 @@ setError(
 setLoading(false);
 
 
+
 });
+
 
 
 },[]);
@@ -613,14 +1019,25 @@ setLoading(false);
 
 
 
+
+
+/* ============================
+   DETAIL AUDIO
+============================ */
+
+
 const openDetail =
-useCallback(async(audio)=>{
+
+useCallback(
+
+async(audio)=>{
 
 
 try{
 
 
 const res =
+
 await axios.get(
 
 `${API}/api/audio-detail/${encodeURIComponent(audio)}`
@@ -628,78 +1045,58 @@ await axios.get(
 );
 
 
+
 setSelected(
+
 res.data
-);
-
-
-}
-
-catch(e){
-
-console.log(e);
-
-}
-
-
-},[]);
-
-
-
-
-
-
-
-let tableData =
-audioList;
-
-
-
-if(filter!=="all"){
-
-
-tableData =
-tableData.filter(
-
-x=>
-
-getStatus(x)===filter
 
 );
 
 
+
 }
 
+catch(err){
 
 
+console.error(err);
 
 
-if(search.trim()){
+setError(
 
-
-tableData =
-tableData.filter(
-
-x=>
-
-x.audio
-.toLowerCase()
-.includes(
-search.toLowerCase()
-)
+"Không tải được chi tiết audio"
 
 );
 
 
+
 }
 
 
 
+},
+
+[]
 
 
+
+);
+
+
+
+
+
+
+
+
+
+/* ============================
+   ERROR CHART
+============================ */
 
 
 const chartData =
+
 useMemo(()=>{
 
 
@@ -709,14 +1106,31 @@ statistics?.error_distribution ?? {}
 
 )
 
-.map(([key,value])=>({
+.map(
+
+([key,value])=>(
+
+
+{
+
 
 name:
+
 translateError(key),
+
+
 
 value
 
-}));
+
+
+}
+
+
+)
+
+);
+
 
 
 },[statistics]);
@@ -727,7 +1141,215 @@ value
 
 
 
-if(loading){
+
+
+/* ============================
+   WER CER CHART
+============================ */
+
+
+const scoreData =
+
+useMemo(()=>{
+
+
+if(
+
+!statistics?.score_chart
+
+||
+
+!Array.isArray(
+
+statistics.score_chart
+
+)
+
+)
+
+{
+
+
+return [];
+
+}
+
+
+
+return statistics.score_chart.map(
+
+(item)=>(
+
+
+
+{
+
+
+name:
+
+item.audio
+
+?
+
+item.audio
+
+.replace(
+
+"common_voice_vi_",
+
+""
+
+)
+
+.replace(
+
+".mp3",
+
+""
+
+)
+
+:
+
+"unknown",
+
+
+
+
+
+WER:
+
+Number(
+
+(item.wer ?? 0)
+
+*
+
+100
+
+)
+
+.toFixed(2),
+
+
+
+
+
+CER:
+
+Number(
+
+(item.cer ?? 0)
+
+*
+
+100
+
+)
+
+.toFixed(2)
+
+
+
+}
+
+
+
+)
+
+
+
+);
+
+
+
+},[statistics]);
+
+
+
+
+
+
+
+
+
+/* ============================
+   FILTER DATA
+============================ */
+
+
+let tableData =
+
+audioList;
+
+
+
+
+
+if(
+
+filter !== "all"
+
+){
+
+
+tableData =
+
+tableData.filter(
+
+item =>
+
+getStatus(item)
+
+===
+
+filter
+
+);
+
+
+
+}
+
+
+
+
+
+
+if(search.trim()){
+
+
+tableData = tableData.filter(
+
+item =>
+
+(item.audio ?? "")
+
+.toLowerCase()
+
+.includes(
+
+search.toLowerCase()
+
+)
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+if(
+
+loading
+
+){
 
 
 return (
@@ -750,6 +1372,33 @@ return (
 
 
 
+
+if(
+
+!statistics
+
+){
+
+
+return (
+
+<div className="loading">
+
+{
+
+error ??
+
+"Không có dữ liệu"
+
+}
+
+
+</div>
+
+);
+
+
+}
 return (
 
 <div className="dashboard">
@@ -757,8 +1406,12 @@ return (
 
 
 <h1>
+
 Vietnamese ASR Error Analyzer
+
 </h1>
+
+
 
 
 <p className="subtitle">
@@ -766,6 +1419,30 @@ Vietnamese ASR Error Analyzer
 Whisper Vietnamese Speech Recognition Dashboard
 
 </p>
+{
+error && (
+
+<div className="error-banner">
+
+{error}
+
+<button
+
+onClick={()=>setError(null)}
+
+>
+
+×
+
+</button>
+
+</div>
+
+)
+}
+
+
+
 
 
 
@@ -774,15 +1451,16 @@ Whisper Vietnamese Speech Recognition Dashboard
 <div className="cards">
 
 
+
 <StatCard
 
 title="Tổng Audio"
 
-value={
-statistics.total_audio
-}
+value={statistics.total_audio}
 
 />
+
+
 
 
 
@@ -790,11 +1468,85 @@ statistics.total_audio
 
 title="Tổng lỗi"
 
-value={
-statistics.total_error
-}
+value={statistics.total_error}
 
 className="red"
+
+/>
+
+
+
+
+
+<StatCard
+
+title="WER trung bình"
+
+value={
+formatPercent(
+statistics.average_wer
+)
+}
+
+/>
+
+
+
+
+
+<StatCard
+
+title="CER trung bình"
+
+value={
+formatPercent(
+statistics.average_cer
+)
+}
+
+/>
+
+
+
+
+
+<StatCard
+
+title="Corpus WER"
+
+value={
+formatPercent(
+statistics.corpus_wer
+)
+}
+
+/>
+
+
+
+
+
+<StatCard
+
+title="Câu đúng"
+
+value={
+statistics.correct_sentence
+}
+
+/>
+
+
+
+
+
+<StatCard
+
+title="Câu lỗi"
+
+value={
+statistics.incorrect_sentence
+}
 
 />
 
@@ -809,16 +1561,35 @@ className="red"
 
 
 
+
+{/* ============================
+    ERROR DISTRIBUTION
+============================ */}
+
+
+
 <div className="section">
 
 
 <h2>
-Phân bố lỗi
+
+Phân bố lỗi tiếng Việt
+
 </h2>
+
+
 
 
 <div className="chart-box">
 
+
+{
+
+chartData.length > 0
+
+&&
+
+(
 
 <ResponsiveContainer
 
@@ -829,27 +1600,49 @@ height="100%"
 >
 
 
-<BarChart data={chartData}>
+<BarChart
+
+data={chartData}
+
+>
 
 
-<XAxis dataKey="name"/>
+<XAxis
+
+dataKey="name"
+
+/>
+
 
 
 <YAxis/>
 
 
+
+
 <Tooltip/>
 
 
-<Bar dataKey="value"/>
+
+
+<Bar
+
+dataKey="value"
+
+/>
+
 
 
 </BarChart>
 
 
-
 </ResponsiveContainer>
 
+)
+
+
+}
+
 
 
 </div>
@@ -862,6 +1655,12 @@ height="100%"
 
 
 
+
+
+
+{/* ============================
+    WER CER CHART
+============================ */}
 
 
 
@@ -869,24 +1668,161 @@ height="100%"
 
 
 <h2>
-Danh sách Audio
+
+WER / CER từng Audio
+
 </h2>
+
+
+
+
+<div className="chart-box">
+
+
+
+{
+
+scoreData.length > 0
+
+&&
+
+(
+
+<ResponsiveContainer
+
+width="100%"
+
+height="100%"
+
+>
+
+
+<BarChart
+
+data={scoreData}
+
+>
+
+
+<XAxis
+
+dataKey="name"
+
+angle={-30}
+
+height={80}
+
+/>
+
+
+
+<YAxis/>
+
+
+
+
+<Tooltip/>
+
+
+
+
+
+<Legend/>
+
+<Bar
+
+dataKey="WER"
+
+fill="#2563eb"
+
+/>
+
+
+<Bar
+
+dataKey="CER"
+
+fill="#dc2626"
+
+/>
+
+
+
+</BarChart>
+
+
+</ResponsiveContainer>
+
+)
+
+
+
+}
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+{/* ============================
+    AUDIO TABLE
+============================ */}
+
+
+
+<div className="section">
+
+
+<h2>
+
+Danh sách Audio
+
+</h2>
+
+
 
 
 
 <input
 
+
 className="search"
+
 
 placeholder="Tìm audio..."
 
+
 value={search}
 
+
+
 onChange={
-e=>setSearch(e.target.value)
+
+e=>setSearch(
+
+e.target.value
+
+)
+
 }
 
+
 />
+
+
+
+
+
 
 
 
@@ -894,22 +1830,111 @@ e=>setSearch(e.target.value)
 <div className="filter">
 
 
-<button onClick={()=>setFilter("all")}>
+<button
+
+className={
+
+filter==="all"
+
+?
+
+"active"
+
+:
+
+""
+
+}
+
+
+onClick={
+
+()=>setFilter("all")
+
+}
+
+>
+
 Tất cả
+
 </button>
 
 
-<button onClick={()=>setFilter("incorrect")}>
+
+
+
+
+
+<button
+
+className={
+
+filter==="incorrect"
+
+?
+
+"active"
+
+:
+
+""
+
+}
+
+
+onClick={
+
+()=>setFilter("incorrect")
+
+}
+
+>
+
 Có lỗi
+
 </button>
 
 
-<button onClick={()=>setFilter("correct")}>
+
+
+
+
+
+<button
+
+className={
+
+filter==="correct"
+
+?
+
+"active"
+
+:
+
+""
+
+}
+
+
+onClick={
+
+()=>setFilter("correct")
+
+}
+
+>
+
 Đúng
+
 </button>
+
 
 
 </div>
+
+
+
 
 
 
@@ -921,27 +1946,49 @@ Có lỗi
 
 <thead>
 
+
 <tr>
 
+
 <th>
+
 Audio
+
 </th>
 
+
+
 <th>
+
 WER
+
 </th>
 
+
+
 <th>
+
 CER
+
 </th>
 
+
+
 <th>
+
 Trạng thái
+
 </th>
 
+
+
 <th>
+
 Lỗi
+
 </th>
+
+
 
 </tr>
 
@@ -952,12 +1999,20 @@ Lỗi
 
 
 
+
+
+
+
 <tbody>
+
 
 
 {
 
-tableData.map(item=>(
+tableData.map(
+
+(item)=>(
+
 
 
 <tr
@@ -965,102 +2020,215 @@ tableData.map(item=>(
 key={item.audio}
 
 onClick={
+
 ()=>openDetail(item.audio)
+
 }
 
 >
 
 
+
 <td>
+
 {item.audio}
+
 </td>
 
 
+
+
+
+
 <td>
+
 {formatPercent(item.wer)}
+
 </td>
 
 
+
+
+
+
 <td>
+
 {formatPercent(item.cer)}
-</td>
-
-
-<td>
-
-{
-STATUS_LABEL[getStatus(item)]
-}
 
 </td>
 
 
 
+
+
+
+
 <td>
-
-
-{
-item.errors?.map(
-
-(e,i)=>(
 
 <span
 
-key={i}
+className={
+
+getStatus(item)==="correct"
+
+?
+
+"status-good"
+
+:
+
+getStatus(item)==="incorrect"
+
+?
+
+"status-bad"
+
+:
+
+"status-failed"
+
+}
+
+>
+
+{
+
+STATUS_LABEL[getStatus(item)]
+
+}
+
+</span>
+
+</td>
+
+
+
+
+
+
+<td>
+
+
+
+{
+
+Array.isArray(item.errors)
+
+&&
+
+item.errors.map(
+
+(error,index)=>(
+
+
+<span
+
+key={index}
 
 className="error-badge"
 
 >
 
-{translateError(e)}
+
+{
+
+translateError(error)
+
+}
+
+
 
 </span>
 
-)
+
 
 )
+
+
+)
+
 
 }
+
 
 
 
 </td>
 
 
+
+
+
+
+
 </tr>
 
 
-))
+
+)
+
+
+)
+
+
 
 }
+
+
+
 
 
 </tbody>
 
 
+
 </table>
+
+
 
 
 </div>
 
 
 
+
+
+
+
+
+
+{/* ============================
+    DETAIL MODAL
+============================ */}
 
 
 
 
 {
-selected &&
+
+selected
+
+&&
+
+
 
 <DetailModal
 
+
 data={selected}
 
+
+
 onClose={
+
 ()=>setSelected(null)
+
 }
 
+
 />
+
+
 
 }
 
@@ -1068,7 +2236,9 @@ onClose={
 
 </div>
 
+
 );
+
 
 
 }

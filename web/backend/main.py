@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -93,6 +94,18 @@ app = FastAPI(
 
     title="Vietnamese ASR Error Analyzer API"
 
+)
+# =====================================================
+# AUDIO STATIC FILE
+# =====================================================
+
+AUDIO_DIR = BASE_DIR / "audio"
+
+
+app.mount(
+    "/audio",
+    StaticFiles(directory=AUDIO_DIR),
+    name="audio"
 )
 
 

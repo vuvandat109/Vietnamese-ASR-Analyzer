@@ -17,7 +17,7 @@ os.environ["PATH"] += os.pathsep + r"E:\ffmpeg-2026-09-07-git-ecc7eb519e-essenti
 df = pd.read_csv(metadata_file, encoding="utf-8-sig")
 
 # TEST 20 FILE TRUOC
-df = df.head(20)
+
 
 print("So file se test:", len(df))
 

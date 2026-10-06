@@ -2,13 +2,28 @@
 
 import json
 import os
+import tempfile
+import time
 
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+
+
+from audio_analyzer import (
+    word_alignment,
+    simple_error_check,
+    analyze_sentence_phoneme,
+    calculate_score
+)
+
+from asr_runtime import (
+    transcribe_audio,
+    loaded_models
+)
 
 
 # =====================================================
@@ -86,7 +101,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -335,6 +350,190 @@ def model_comparison():
         "best": best,
         "total_models": len(models)
     }
+
+
+
+# =====================================================
+# TEST NEW AUDIO
+# =====================================================
+
+@app.post("/api/test-audio")
+async def test_audio(
+    file: UploadFile = File(...),
+    model: str = Form(DEFAULT_MODEL),
+    ground_truth: str = Form("")
+):
+
+    model = normalize_model(
+        model
+    )
+
+    filename = (
+        file.filename
+        or "uploaded_audio.wav"
+    )
+
+    suffix = Path(
+        filename
+    ).suffix.lower()
+
+    allowed_suffixes = {
+        ".wav",
+        ".mp3",
+        ".m4a",
+        ".flac",
+        ".ogg",
+        ".webm",
+        ".aac"
+    }
+
+    if suffix not in allowed_suffixes:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Định dạng audio không hỗ trợ. "
+                "Hỗ trợ: WAV, MP3, M4A, FLAC, OGG, WEBM, AAC."
+            )
+        )
+
+    content = await file.read()
+
+    if not content:
+
+        raise HTTPException(
+            status_code=400,
+            detail="File audio rỗng."
+        )
+
+    max_size = 50 * 1024 * 1024
+
+    if len(content) > max_size:
+
+        raise HTTPException(
+            status_code=413,
+            detail="File audio vượt quá 50 MB."
+        )
+
+    temp_path = None
+
+    try:
+
+        with tempfile.NamedTemporaryFile(
+            delete=False,
+            suffix=suffix
+        ) as tmp:
+
+            tmp.write(
+                content
+            )
+
+            temp_path = Path(
+                tmp.name
+            )
+
+        started = time.perf_counter()
+
+        prediction = transcribe_audio(
+            temp_path,
+            model
+        )
+
+        processing_seconds = (
+            time.perf_counter()
+            - started
+        )
+
+        reference = str(
+            ground_truth
+            or ""
+        ).strip()
+
+        response = {
+            "audio": filename,
+            "model": model,
+            "model_name": MODEL_NAMES[model],
+            "prediction": prediction,
+            "ground_truth": reference,
+            "processing_seconds": round(
+                processing_seconds,
+                3
+            ),
+            "loaded_models": loaded_models(),
+            "has_ground_truth": bool(
+                reference
+            ),
+            "wer": None,
+            "cer": None,
+            "status": "unscored",
+            "errors": [],
+            "alignment": [],
+            "word_analysis": []
+        }
+
+        if reference:
+
+            alignment = word_alignment(
+                reference,
+                prediction
+            )
+
+            errors = simple_error_check(
+                alignment
+            )
+
+            word_analysis = analyze_sentence_phoneme(
+                alignment
+            )
+
+            score = calculate_score(
+                reference,
+                prediction
+            )
+
+            response.update({
+                "wer": score.get(
+                    "wer"
+                ),
+                "cer": score.get(
+                    "cer"
+                ),
+                "status": (
+                    "correct"
+                    if len(errors) == 0
+                    else "incorrect"
+                ),
+                "errors": errors,
+                "alignment": alignment,
+                "word_analysis": word_analysis
+            })
+
+        return response
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"Không thể nhận dạng audio bằng "
+                f"{MODEL_NAMES[model]}: {exc}"
+            )
+        )
+
+    finally:
+
+        if (
+            temp_path is not None
+            and temp_path.exists()
+        ):
+
+            try:
+                temp_path.unlink()
+            except OSError:
+                pass
 
 
 # =====================================================

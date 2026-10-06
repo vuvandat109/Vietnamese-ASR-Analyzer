@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 
 
@@ -323,6 +323,172 @@ function getStatus(item) {
 
 
 
+}
+
+
+
+function renderWordDiff(words, side) {
+  if (!Array.isArray(words) || words.length === 0) {
+    return null;
+  }
+
+  return (
+    <span
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "6px",
+        alignItems: "center",
+        lineHeight: 1.9
+      }}
+    >
+      {words.map((word, index) => {
+        const ref =
+          word?.reference === null || word?.reference === undefined
+            ? ""
+            : String(word.reference).trim();
+
+        const pred =
+          word?.prediction === null || word?.prediction === undefined
+            ? ""
+            : String(word.prediction).trim();
+
+        const isInsertion = !ref && !!pred;
+        const isDeletion = !!ref && !pred;
+        const isSubstitution = !!ref && !!pred && ref !== pred;
+        const isEqual = !!ref && !!pred && ref === pred;
+
+        const value = side === "reference" ? ref : pred;
+
+        if (!value) {
+          return null;
+        }
+
+        let background = "rgba(34, 197, 94, 0.12)";
+        let border = "rgba(34, 197, 94, 0.28)";
+        let color = "#15803d";
+        let title = "Đúng";
+
+        if (isSubstitution) {
+          background = "rgba(245, 158, 11, 0.14)";
+          border = "rgba(245, 158, 11, 0.34)";
+          color = "#b45309";
+          title = "Thay thế";
+        }
+
+        if (isDeletion && side === "reference") {
+          background = "rgba(239, 68, 68, 0.14)";
+          border = "rgba(239, 68, 68, 0.34)";
+          color = "#b91c1c";
+          title = "Mất từ";
+        }
+
+        if (isInsertion && side === "prediction") {
+          background = "rgba(139, 92, 246, 0.14)";
+          border = "rgba(139, 92, 246, 0.34)";
+          color = "#7c3aed";
+          title = "Thêm từ";
+        }
+
+        if (!isEqual && !isSubstitution && !isDeletion && !isInsertion) {
+          background = "rgba(100, 116, 139, 0.10)";
+          border = "rgba(100, 116, 139, 0.24)";
+          color = "inherit";
+        }
+
+        return (
+          <span
+            key={`${side}-${index}`}
+            title={title}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "2px 7px",
+              borderRadius: "7px",
+              border: `1px solid ${border}`,
+              background,
+              color,
+              fontWeight: isEqual ? 600 : 700,
+              whiteSpace: "nowrap"
+            }}
+          >
+            {value}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+
+function WordDiffLegend() {
+  const itemStyle = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "5px",
+    fontSize: "12px"
+  };
+
+  const dot = (background, border) => ({
+    width: "12px",
+    height: "12px",
+    borderRadius: "4px",
+    background,
+    border: `1px solid ${border}`,
+    display: "inline-block"
+  });
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "12px",
+        marginTop: "10px",
+        color: "var(--text-soft)"
+      }}
+    >
+      <span style={itemStyle}>
+        <span
+          style={dot(
+            "rgba(34, 197, 94, 0.12)",
+            "rgba(34, 197, 94, 0.28)"
+          )}
+        />
+        Đúng
+      </span>
+
+      <span style={itemStyle}>
+        <span
+          style={dot(
+            "rgba(245, 158, 11, 0.14)",
+            "rgba(245, 158, 11, 0.34)"
+          )}
+        />
+        Thay thế
+      </span>
+
+      <span style={itemStyle}>
+        <span
+          style={dot(
+            "rgba(239, 68, 68, 0.14)",
+            "rgba(239, 68, 68, 0.34)"
+          )}
+        />
+        Mất từ
+      </span>
+
+      <span style={itemStyle}>
+        <span
+          style={dot(
+            "rgba(139, 92, 246, 0.14)",
+            "rgba(139, 92, 246, 0.34)"
+          )}
+        />
+        Thêm từ
+      </span>
+    </div>
+  );
 }
 
 
@@ -735,7 +901,7 @@ function DetailPanel({ data, onClose }) {
 
 
 
-          {/* So sánh câu chuẩn & Whisper */}
+          {/* So sánh câu chuẩn & mô hình đang chọn */}
 
 
 
@@ -753,37 +919,46 @@ function DetailPanel({ data, onClose }) {
 
               <div className="sentence sentence--ref">
 
-
-
                 <span className="sentence-label">Chuẩn (Ground Truth)</span>
 
-
-
-                <p>{data.ground_truth ?? data.reference ?? data.cau_chuan ?? "-"}</p>
-
-
+                <div style={{ marginTop: "8px" }}>
+                  {words.length > 0
+                    ? renderWordDiff(words, "reference")
+                    : (
+                      <p>
+                        {data.ground_truth ??
+                          data.reference ??
+                          data.cau_chuan ??
+                          "-"}
+                      </p>
+                    )}
+                </div>
 
               </div>
-
-
-
-
-
 
 
               <div className="sentence sentence--pred">
 
+                <span className="sentence-label">
+                  {data.model_name ?? "ASR"} Nhận dạng
+                </span>
 
-
-                <span className="sentence-label">{data.model_name ?? "ASR"} Nhận dạng</span>
-
-
-
-                <p>{data.prediction ?? data.whisper ?? data.whisper_text ?? "-"}</p>
-
-
+                <div style={{ marginTop: "8px" }}>
+                  {words.length > 0
+                    ? renderWordDiff(words, "prediction")
+                    : (
+                      <p>
+                        {data.prediction ??
+                          data.whisper ??
+                          data.whisper_text ??
+                          "-"}
+                      </p>
+                    )}
+                </div>
 
               </div>
+
+              {words.length > 0 && <WordDiffLegend />}
 
 
 
@@ -969,7 +1144,7 @@ function DetailPanel({ data, onClose }) {
 
 
 
-                              <th>Whisper</th>
+                              <th>{data.model_name ?? "ASR"}</th>
 
 
 
@@ -1226,6 +1401,22 @@ export default function App() {
   const [sortBy, setSortBy] = useState("default");
 
 
+  const [testAudioFile, setTestAudioFile] = useState(null);
+  const [testGroundTruth, setTestGroundTruth] = useState("");
+  const [testResult, setTestResult] = useState(null);
+  const [testLoading, setTestLoading] = useState(false);
+  const [testError, setTestError] = useState("");
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState("");
+
+  const mediaRecorderRef = useRef(null);
+  const mediaStreamRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+  const recordingTimerRef = useRef(null);
+
+
 
 
 
@@ -1324,6 +1515,225 @@ export default function App() {
 
 
 
+
+
+
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+      }
+
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current
+          .getTracks()
+          .forEach((track) => track.stop());
+      }
+
+      if (recordedAudioUrl) {
+        URL.revokeObjectURL(recordedAudioUrl);
+      }
+    };
+  }, [recordedAudioUrl]);
+
+
+  function formatRecordingTime(totalSeconds) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+
+  async function startRecording() {
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia ||
+      typeof MediaRecorder === "undefined"
+    ) {
+      setTestError(
+        "Trình duyệt này không hỗ trợ thu âm trực tiếp bằng micro."
+      );
+      return;
+    }
+
+    try {
+      setTestError("");
+      setTestResult(null);
+
+      if (recordedAudioUrl) {
+        URL.revokeObjectURL(recordedAudioUrl);
+        setRecordedAudioUrl("");
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+
+      mediaStreamRef.current = stream;
+      recordedChunksRef.current = [];
+
+      const preferredMimeTypes = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/ogg;codecs=opus"
+      ];
+
+      const mimeType = preferredMimeTypes.find(
+        (type) => MediaRecorder.isTypeSupported(type)
+      );
+
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const finalMimeType =
+          recorder.mimeType || mimeType || "audio/webm";
+
+        const extension = finalMimeType.includes("ogg")
+          ? "ogg"
+          : "webm";
+
+        const blob = new Blob(
+          recordedChunksRef.current,
+          { type: finalMimeType }
+        );
+
+        const file = new File(
+          [blob],
+          `microphone_${Date.now()}.${extension}`,
+          { type: finalMimeType }
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        setRecordedAudioUrl(url);
+        setTestAudioFile(file);
+
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current
+            .getTracks()
+            .forEach((track) => track.stop());
+
+          mediaStreamRef.current = null;
+        }
+      };
+
+      recorder.start(250);
+
+      setRecordingSeconds(0);
+      setIsRecording(true);
+
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingSeconds((seconds) => seconds + 1);
+      }, 1000);
+
+    } catch (err) {
+      setTestError(
+        err?.name === "NotAllowedError"
+          ? "Bạn chưa cấp quyền sử dụng micro. Hãy cho phép trình duyệt truy cập micro rồi thử lại."
+          : `Không thể mở micro: ${err?.message ?? "Lỗi không xác định"}`
+      );
+    }
+  }
+
+
+  function stopRecording() {
+    const recorder = mediaRecorderRef.current;
+
+    if (
+      recorder &&
+      recorder.state !== "inactive"
+    ) {
+      recorder.stop();
+    }
+
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+
+    setIsRecording(false);
+  }
+
+
+  function clearRecordedAudio() {
+    if (isRecording) {
+      stopRecording();
+    }
+
+    if (recordedAudioUrl) {
+      URL.revokeObjectURL(recordedAudioUrl);
+    }
+
+    setRecordedAudioUrl("");
+    setTestAudioFile(null);
+    setRecordingSeconds(0);
+    setTestResult(null);
+    setTestError("");
+  }
+
+
+  async function handleTestAudio(event) {
+    event.preventDefault();
+
+    if (!testAudioFile) {
+      setTestError("Vui lòng chọn một file audio.");
+      return;
+    }
+
+    setTestLoading(true);
+    setTestError("");
+    setTestResult(null);
+
+    const formData = new FormData();
+
+    formData.append(
+      "file",
+      testAudioFile
+    );
+
+    formData.append(
+      "model",
+      activeModel
+    );
+
+    formData.append(
+      "ground_truth",
+      testGroundTruth.trim()
+    );
+
+    try {
+      const response = await axios.post(
+        `${API}/api/test-audio`,
+        formData
+      );
+
+      setTestResult(
+        response.data
+      );
+    } catch (err) {
+      setTestError(
+        err?.response?.data?.detail ??
+          "Không thể nhận dạng audio. Kiểm tra backend và model."
+      );
+    } finally {
+      setTestLoading(false);
+    }
+  }
 
 
 
@@ -2573,6 +2983,394 @@ export default function App() {
             </div>
           </section>
 
+
+
+          {/* LIVE AUDIO TEST */}
+          <section className="section">
+            <div className="section-header">
+              <h2>🎤 Test audio mới trực tiếp</h2>
+              <span className="badge-count">
+                {activeModelName}
+              </span>
+            </div>
+
+            <form
+              onSubmit={handleTestAudio}
+              style={{
+                display: "grid",
+                gap: "14px"
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(260px, 1fr))",
+                  gap: "14px"
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      marginBottom: "7px"
+                    }}
+                  >
+                    Nguồn audio
+                  </div>
+
+                  <div className="audio-source-panel">
+                    <input
+                      type="file"
+                      accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg,.webm,.aac"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+
+                        if (recordedAudioUrl) {
+                          URL.revokeObjectURL(recordedAudioUrl);
+                          setRecordedAudioUrl("");
+                        }
+
+                        setTestAudioFile(file);
+                        setRecordingSeconds(0);
+                        setTestResult(null);
+                        setTestError("");
+                      }}
+                      className="audio-file-input"
+                    />
+
+                    <div className="mic-divider">
+                      <span>hoặc</span>
+                    </div>
+
+                    <div className="mic-recorder">
+                      <div className="mic-recorder-main">
+                        <div
+                          className={
+                            isRecording
+                              ? "mic-status mic-status--recording"
+                              : "mic-status"
+                          }
+                        >
+                          <span className="mic-status-dot" />
+
+                          <span>
+                            {isRecording
+                              ? `Đang thu ${formatRecordingTime(recordingSeconds)}`
+                              : recordedAudioUrl
+                                ? `Đã thu ${formatRecordingTime(recordingSeconds)}`
+                                : "Thu trực tiếp bằng micro"}
+                          </span>
+                        </div>
+
+                        <div className="mic-actions">
+                          {!isRecording ? (
+                            <button
+                              type="button"
+                              className="mic-btn mic-btn--start"
+                              onClick={startRecording}
+                              disabled={testLoading}
+                            >
+                              🎙️ Bắt đầu thu
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="mic-btn mic-btn--stop"
+                              onClick={stopRecording}
+                            >
+                              ⏹ Dừng thu
+                            </button>
+                          )}
+
+                          {recordedAudioUrl && !isRecording && (
+                            <button
+                              type="button"
+                              className="mic-btn mic-btn--clear"
+                              onClick={clearRecordedAudio}
+                              disabled={testLoading}
+                            >
+                              ✕ Thu lại
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {isRecording && (
+                        <div className="recording-wave" aria-hidden="true">
+                          {Array.from({ length: 18 }).map((_, index) => (
+                            <span
+                              key={index}
+                              style={{
+                                animationDelay: `${index * 0.055}s`
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {recordedAudioUrl && !isRecording && (
+                        <div className="recorded-preview">
+                          <audio
+                            controls
+                            src={recordedAudioUrl}
+                          />
+
+                          <span className="recorded-ready">
+                            ✓ Bản thu đã sẵn sàng để nhận dạng
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      marginBottom: "7px"
+                    }}
+                  >
+                    Model nhận dạng
+                  </div>
+
+                  <select
+                    value={activeModel}
+                    onChange={(e) => {
+                      setActiveModel(
+                        e.target.value
+                      );
+                      setSelected(null);
+                      setCurrentPage(1);
+                      setTestResult(null);
+                    }}
+                    style={{
+                      width: "100%",
+                      border: "1px solid var(--line)",
+                      background: "var(--surface)",
+                      color: "var(--text)",
+                      padding: "10px 12px",
+                      borderRadius: "10px",
+                      fontFamily: "inherit",
+                      fontSize: "14px",
+                      fontWeight: 600
+                    }}
+                  >
+                    <option value="whisper">
+                      Whisper base
+                    </option>
+                    <option value="phowhisper">
+                      PhoWhisper base
+                    </option>
+                    <option value="wav2vec2">
+                      Wav2Vec2 Vietnamese
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    marginBottom: "7px"
+                  }}
+                >
+                  Ground Truth
+                  <span
+                    style={{
+                      fontWeight: 400,
+                      color: "var(--text-soft)"
+                    }}
+                  >
+                    {" "}
+                    (không bắt buộc)
+                  </span>
+                </div>
+
+                <textarea
+                  value={testGroundTruth}
+                  onChange={(e) =>
+                    setTestGroundTruth(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Nhập câu chuẩn nếu muốn tính WER/CER và phân tích lỗi..."
+                  rows={3}
+                  style={{
+                    width: "100%",
+                    resize: "vertical",
+                    padding: "11px 12px",
+                    border: "1px solid var(--line)",
+                    borderRadius: "10px",
+                    background: "var(--surface)",
+                    color: "var(--text)",
+                    fontFamily: "inherit",
+                    fontSize: "14px",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={
+                    testLoading ||
+                    !testAudioFile
+                  }
+                  style={{
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: "10px 18px",
+                    fontWeight: 700,
+                    cursor:
+                      testLoading || !testAudioFile
+                        ? "not-allowed"
+                        : "pointer",
+                    opacity:
+                      testLoading || !testAudioFile
+                        ? 0.6
+                        : 1
+                  }}
+                >
+                  {testLoading
+                    ? "⏳ Đang nhận dạng..."
+                    : recordedAudioUrl
+                      ? "✨ Nhận dạng bản thu"
+                      : "🎙️ Nhận dạng audio"}
+                </button>
+              </div>
+            </form>
+
+            {testError && (
+              <div
+                style={{
+                  marginTop: "14px",
+                  padding: "12px",
+                  borderRadius: "10px",
+                  background:
+                    "rgba(239, 68, 68, 0.10)",
+                  border:
+                    "1px solid rgba(239, 68, 68, 0.28)",
+                  color: "#b91c1c"
+                }}
+              >
+                {testError}
+              </div>
+            )}
+
+            {testResult && (
+              <div
+                style={{
+                  marginTop: "18px",
+                  display: "grid",
+                  gap: "14px"
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "10px"
+                  }}
+                >
+                  <span className="file-badge">
+                    {testResult.model_name}
+                  </span>
+
+                  <span className="badge-count">
+                    ⏱ {Number(
+                      testResult.processing_seconds ?? 0
+                    ).toFixed(2)}s
+                  </span>
+
+                  {testResult.has_ground_truth && (
+                    <>
+                      <span className="badge-count">
+                        WER: {percent(testResult.wer)}
+                      </span>
+
+                      <span className="badge-count">
+                        CER: {percent(testResult.cer)}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {testResult.has_ground_truth && (
+                  <div className="sentence sentence--ref">
+                    <span className="sentence-label">
+                      Chuẩn (Ground Truth)
+                    </span>
+
+                    <div style={{ marginTop: "8px" }}>
+                      {Array.isArray(
+                        testResult.word_analysis
+                      ) &&
+                      testResult.word_analysis.length > 0
+                        ? renderWordDiff(
+                            testResult.word_analysis,
+                            "reference"
+                          )
+                        : (
+                          <p>
+                            {testResult.ground_truth}
+                          </p>
+                        )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="sentence sentence--pred">
+                  <span className="sentence-label">
+                    {testResult.model_name} Nhận dạng
+                  </span>
+
+                  <div style={{ marginTop: "8px" }}>
+                    {testResult.has_ground_truth &&
+                    Array.isArray(
+                      testResult.word_analysis
+                    ) &&
+                    testResult.word_analysis.length > 0
+                      ? renderWordDiff(
+                          testResult.word_analysis,
+                          "prediction"
+                        )
+                      : (
+                        <p>
+                          {testResult.prediction || "(Không nhận dạng được văn bản)"}
+                        </p>
+                      )}
+                  </div>
+                </div>
+
+                {testResult.has_ground_truth &&
+                  Array.isArray(
+                    testResult.word_analysis
+                  ) &&
+                  testResult.word_analysis.length > 0 && (
+                    <WordDiffLegend />
+                  )}
+
+                {!testResult.has_ground_truth && (
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "var(--text-soft)"
+                    }}
+                  >
+                    Nhập Ground Truth để hệ thống tính WER/CER
+                    và phân tích lỗi tiếng Việt.
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
 
 
           {/* AUDIO LIST TABLE */}

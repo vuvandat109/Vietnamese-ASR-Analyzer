@@ -1,0 +1,8 @@
+*
+!Dockerfile
+!web/
+!web/backend/
+!web/backend/*.py
+!web/backend/requirements.docker.txt
+!deploy/
+!deploy/check_data.py

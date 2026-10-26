@@ -4,11 +4,13 @@ import json
 import os
 import tempfile
 import time
+import uuid
 
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Request
+from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,6 +31,13 @@ from asr_runtime import (
 # =====================================================
 # CONFIG
 # =====================================================
+
+API_VERSION = "1.0.0"
+API_PREFIX = "/api/v1"
+MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "50"))
+if MAX_UPLOAD_MB <= 0:
+    raise ValueError("MAX_UPLOAD_MB phải lớn hơn 0")
+MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
 
 BASE_DIR = Path(
     os.getenv(
@@ -60,8 +69,9 @@ DEFAULT_MODEL = "whisper"
 
 ALLOWED_ORIGINS = os.getenv(
     "CORS_ORIGINS",
-    "http://localhost:5173,http://localhost:5174,http://localhost:3000"
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:3000"
 ).split(",")
+ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS if origin.strip()]
 
 
 STATUS_MAP = {
@@ -81,7 +91,9 @@ STATUS_MAP = {
 # =====================================================
 
 app = FastAPI(
-    title="Vietnamese ASR Error Analyzer API"
+    title="Vietnamese ASR Error Analyzer API",
+    version=API_VERSION,
+    description="API nhận dạng và phân tích lỗi tiếng Việt với ba mô hình ASR."
 )
 
 
@@ -93,7 +105,7 @@ AUDIO_DIR = BASE_DIR / "audio"
 
 app.mount(
     "/audio",
-    StaticFiles(directory=AUDIO_DIR),
+    StaticFiles(directory=AUDIO_DIR, check_dir=False),
     name="audio"
 )
 
@@ -287,6 +299,7 @@ def home():
 # =====================================================
 
 @app.get("/api/models")
+@app.get("/api/v1/models", tags=["Models"])
 def models():
 
     return {
@@ -306,6 +319,7 @@ def models():
 # =====================================================
 
 @app.get("/api/statistics")
+@app.get("/api/v1/analytics/statistics", tags=["Analytics"])
 def statistics(
     model: str = Query(
         DEFAULT_MODEL,
@@ -329,6 +343,7 @@ def statistics(
 # =====================================================
 
 @app.get("/api/model-comparison")
+@app.get("/api/v1/analytics/model-comparison", tags=["Analytics"])
 def model_comparison():
 
     data = load_json(
@@ -358,6 +373,7 @@ def model_comparison():
 # =====================================================
 
 @app.post("/api/test-audio")
+@app.post("/api/v1/asr/transcribe", tags=["ASR"])
 async def test_audio(
     file: UploadFile = File(...),
     model: str = Form(DEFAULT_MODEL),
@@ -397,7 +413,7 @@ async def test_audio(
             )
         )
 
-    content = await file.read()
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
 
     if not content:
 
@@ -406,13 +422,13 @@ async def test_audio(
             detail="File audio rỗng."
         )
 
-    max_size = 50 * 1024 * 1024
+    max_size = MAX_UPLOAD_BYTES
 
     if len(content) > max_size:
 
         raise HTTPException(
             status_code=413,
-            detail="File audio vượt quá 50 MB."
+            detail=f"File audio vượt quá {MAX_UPLOAD_MB} MB."
         )
 
     temp_path = None
@@ -434,7 +450,8 @@ async def test_audio(
 
         started = time.perf_counter()
 
-        prediction = transcribe_audio(
+        prediction = await run_in_threadpool(
+            transcribe_audio,
             temp_path,
             model
         )
@@ -541,6 +558,7 @@ async def test_audio(
 # =====================================================
 
 @app.get("/api/audio-list")
+@app.get("/api/v1/analytics/audio-list", tags=["Analytics"])
 def audio_list(
     model: str = Query(
         DEFAULT_MODEL,
@@ -623,6 +641,7 @@ def audio_list(
 # =====================================================
 
 @app.get("/api/audio-detail/{audio:path}")
+@app.get("/api/v1/analytics/audio-detail/{audio:path}", tags=["Analytics"])
 def audio_detail(
     audio: str,
     model: str = Query(
@@ -646,3 +665,58 @@ def audio_detail(
         )
 
     return item
+
+
+# =====================================================
+# SYSTEM / API METADATA
+# =====================================================
+
+@app.middleware("http")
+async def api_metadata(request: Request, call_next):
+    request_id = str(uuid.uuid4())
+    started = time.perf_counter()
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    response.headers["X-API-Version"] = API_VERSION
+    response.headers["X-Process-Time"] = f"{time.perf_counter() - started:.4f}"
+    return response
+
+
+@app.get("/health", tags=["System"])
+def health():
+    return {"status": "ok", "version": API_VERSION}
+
+
+@app.get("/ready", tags=["System"])
+def ready():
+    from fastapi.responses import JSONResponse
+
+    checks = {
+        "dataset_dir": BASE_DIR.is_dir(),
+        "audio_dir": AUDIO_DIR.is_dir(),
+        "statistics": {key: path.is_file() for key, path in STAT_FILES.items()},
+        "analysis": {key: path.is_file() for key, path in ANALYSIS_FILES.items()},
+        "model_comparison": MODEL_COMPARISON_FILE.is_file(),
+    }
+    ok = (
+        checks["dataset_dir"]
+        and checks["audio_dir"]
+        and all(checks["statistics"].values())
+        and all(checks["analysis"].values())
+        and checks["model_comparison"]
+    )
+    return JSONResponse(
+        status_code=200 if ok else 503,
+        content={"status": "ready" if ok else "degraded", "checks": checks},
+    )
+
+
+@app.get("/api/v1/system/info", tags=["System"])
+def system_info():
+    return {
+        "version": API_VERSION,
+        "api_prefix": API_PREFIX,
+        "max_upload_mb": MAX_UPLOAD_MB,
+        "loaded_models": loaded_models(),
+        "supported_audio": [".wav", ".mp3", ".m4a", ".flac", ".ogg", ".webm", ".aac"],
+    }
